@@ -1,0 +1,22 @@
+{
+  "overview": "Yadav Dairy is a modern dairy e-commerce platform with a complete product catalog spanning 10 categories, smart search and filters, a shopping cart, mock checkout, and an admin panel — all styled with a clean Zomato/Swiggy-inspired mobile-first UI.",
+  "features": [
+    "Full dairy product catalog (10 categories, 60+ products with English + Hindi names)",
+    "Homepage with hero banner, category carousel, featured & trending products",
+    "Product detail pages with ratings, stock status, and packaging info",
+    "Search with category, price, and packaging filters",
+    "Shopping cart with real-time totals and checkout flow",
+    "Admin panel with product/category CRUD and order management",
+    "Mobile-first responsive design with smooth animations"
+  ],
+  "category": "e-commerce",
+  "tags": [
+    "dairy",
+    "e-commerce",
+    "shopping",
+    "admin-panel",
+    "mobile-first",
+    "product-catalog"
+  ],
+  "last_updated": "2026-04-09T12:03:54.679Z"
+}
