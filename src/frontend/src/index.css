@@ -5,91 +5,91 @@
 @layer base {
   :root {
     --font-display: "Space Grotesk";
-    --font-body: "DM Sans";
-    --font-mono: "Geist Mono";
+    --font-body: "Satoshi";
+    --font-mono: "JetBrains Mono";
     --radius: 0.625rem;
 
-    --background: 0.97 0.008 75;
-    --foreground: 0.18 0.02 50;
-    --card: 1.0 0.004 240;
-    --card-foreground: 0.18 0.02 50;
-    --popover: 1.0 0.004 240;
-    --popover-foreground: 0.18 0.02 50;
+    --background: 0.98 0.008 95;
+    --foreground: 0.14 0.03 50;
+    --card: 0.99 0.005 240;
+    --card-foreground: 0.14 0.03 50;
+    --popover: 0.99 0.005 240;
+    --popover-foreground: 0.14 0.03 50;
 
-    --primary: 0.48 0.18 240;
+    --primary: 0.52 0.16 215;
     --primary-foreground: 0.98 0.005 240;
 
-    --secondary: 0.94 0.01 75;
-    --secondary-foreground: 0.28 0.02 50;
-    --muted: 0.92 0.01 75;
-    --muted-foreground: 0.52 0.01 50;
+    --secondary: 0.92 0.015 95;
+    --secondary-foreground: 0.28 0.025 50;
+    --muted: 0.9 0.008 95;
+    --muted-foreground: 0.56 0.008 50;
 
-    --accent: 0.58 0.16 30;
+    --accent: 0.62 0.22 25;
     --accent-foreground: 0.98 0.005 30;
 
-    --destructive: 0.55 0.22 25;
+    --destructive: 0.52 0.26 20;
     --destructive-foreground: 0.98 0 0;
 
-    --border: 0.88 0.01 75;
-    --input: 0.88 0.01 75;
-    --ring: 0.48 0.18 240;
+    --border: 0.88 0.008 95;
+    --input: 0.88 0.008 95;
+    --ring: 0.62 0.22 25;
 
-    --chart-1: 0.48 0.18 240;
-    --chart-2: 0.58 0.16 30;
+    --chart-1: 0.52 0.16 215;
+    --chart-2: 0.62 0.22 25;
     --chart-3: 0.65 0.18 150;
     --chart-4: 0.45 0.15 0;
     --chart-5: 0.6 0.14 280;
 
-    --sidebar: 0.98 0.004 75;
-    --sidebar-foreground: 0.18 0.02 50;
-    --sidebar-primary: 0.48 0.18 240;
+    --sidebar: 0.98 0.008 95;
+    --sidebar-foreground: 0.14 0.03 50;
+    --sidebar-primary: 0.52 0.16 215;
     --sidebar-primary-foreground: 0.98 0.005 240;
-    --sidebar-accent: 0.92 0.01 75;
-    --sidebar-accent-foreground: 0.28 0.02 50;
-    --sidebar-border: 0.88 0.01 75;
-    --sidebar-ring: 0.48 0.18 240;
+    --sidebar-accent: 0.9 0.008 95;
+    --sidebar-accent-foreground: 0.28 0.025 50;
+    --sidebar-border: 0.88 0.008 95;
+    --sidebar-ring: 0.62 0.22 25;
   }
 
   .dark {
-    --background: 0.14 0.015 75;
-    --foreground: 0.92 0.01 75;
-    --card: 0.18 0.018 75;
-    --card-foreground: 0.92 0.01 75;
-    --popover: 0.22 0.02 75;
-    --popover-foreground: 0.92 0.01 75;
+    --background: 0.11 0.015 95;
+    --foreground: 0.94 0.01 95;
+    --card: 0.15 0.018 95;
+    --card-foreground: 0.94 0.01 95;
+    --popover: 0.19 0.02 95;
+    --popover-foreground: 0.94 0.01 95;
 
-    --primary: 0.68 0.16 240;
+    --primary: 0.64 0.16 215;
     --primary-foreground: 0.98 0.005 240;
 
-    --secondary: 0.22 0.02 75;
-    --secondary-foreground: 0.82 0.01 75;
-    --muted: 0.22 0.02 75;
-    --muted-foreground: 0.52 0.015 75;
+    --secondary: 0.19 0.018 95;
+    --secondary-foreground: 0.86 0.01 95;
+    --muted: 0.19 0.018 95;
+    --muted-foreground: 0.56 0.012 95;
 
-    --accent: 0.65 0.15 30;
+    --accent: 0.68 0.22 25;
     --accent-foreground: 0.98 0.005 30;
 
-    --destructive: 0.55 0.22 25;
-    --destructive-foreground: 0.92 0.01 25;
+    --destructive: 0.58 0.24 20;
+    --destructive-foreground: 0.94 0.01 95;
 
-    --border: 0.26 0.02 75;
-    --input: 0.26 0.02 75;
-    --ring: 0.68 0.16 240;
+    --border: 0.22 0.018 95;
+    --input: 0.22 0.018 95;
+    --ring: 0.68 0.22 25;
 
-    --chart-1: 0.68 0.16 240;
-    --chart-2: 0.65 0.15 30;
+    --chart-1: 0.64 0.16 215;
+    --chart-2: 0.68 0.22 25;
     --chart-3: 0.6 0.16 150;
     --chart-4: 0.5 0.12 0;
     --chart-5: 0.7 0.14 280;
 
-    --sidebar: 0.18 0.018 75;
-    --sidebar-foreground: 0.92 0.01 75;
-    --sidebar-primary: 0.68 0.16 240;
+    --sidebar: 0.15 0.018 95;
+    --sidebar-foreground: 0.94 0.01 95;
+    --sidebar-primary: 0.64 0.16 215;
     --sidebar-primary-foreground: 0.98 0.005 240;
-    --sidebar-accent: 0.22 0.02 75;
-    --sidebar-accent-foreground: 0.82 0.01 75;
-    --sidebar-border: 0.26 0.02 75;
-    --sidebar-ring: 0.68 0.16 240;
+    --sidebar-accent: 0.19 0.018 95;
+    --sidebar-accent-foreground: 0.86 0.01 95;
+    --sidebar-border: 0.22 0.018 95;
+    --sidebar-ring: 0.68 0.22 25;
   }
 
   * {
@@ -107,14 +107,14 @@
 }
 
 @font-face {
-  font-family: "DM Sans";
-  src: url("/assets/fonts/DMSans.woff2") format("woff2");
+  font-family: "Satoshi";
+  src: url("/assets/fonts/Satoshi.woff2") format("woff2");
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Geist Mono";
-  src: url("/assets/fonts/GeistMono.woff2") format("woff2");
+  font-family: "JetBrains Mono";
+  src: url("/assets/fonts/JetBrainsMono.woff2") format("woff2");
   font-display: swap;
 }
 
@@ -124,18 +124,98 @@
   }
 
   .card-hover {
-    @apply transition-smooth hover:shadow-lg hover:-translate-y-1;
+    @apply transition-smooth hover:shadow-elevated hover:-translate-y-1;
   }
 
   .btn-primary {
-    @apply bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold transition-smooth hover:opacity-90;
+    @apply bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold transition-smooth hover:opacity-90 shadow-subtle;
   }
 
   .btn-accent {
-    @apply bg-accent text-accent-foreground px-4 py-2 rounded-lg font-semibold transition-smooth hover:opacity-90;
+    @apply bg-accent text-accent-foreground px-4 py-2 rounded-lg font-semibold transition-smooth hover:opacity-90 shadow-card;
   }
 
   .text-subtle {
     @apply text-muted-foreground text-sm;
+  }
+
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .float-animation {
+      animation: none;
+    }
+  }
+
+  .pulse-accent {
+    animation: pulse-accent 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-accent {
+      animation: none;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in {
+      animation: none;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slide-up {
+      animation: none;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes pulse-accent {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

@@ -1,26 +1,117 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "@tanstack/react-router";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
+  Lock,
   Minus,
   Package,
   Plus,
-  ShoppingCart,
+  ShoppingBag,
   Trash2,
+  User,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
 import ProductPackageSVG from "../components/products/ProductPackageSVG";
+import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../hooks/use-cart";
 import { formatPrice } from "../lib/utils";
 
+function CartSkeleton() {
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-6 lg:max-w-5xl">
+      <Skeleton className="h-7 w-32 mb-2 rounded-xl" />
+      <Skeleton className="h-4 w-20 mb-6 rounded-lg" />
+      <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+        <div className="lg:col-span-2 space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-card rounded-2xl border border-border p-4 flex gap-4"
+            >
+              <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4 rounded" />
+                <Skeleton className="h-3 w-1/2 rounded" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-24 rounded" />
+              </div>
+              <div className="flex flex-col items-end gap-3">
+                <Skeleton className="w-6 h-6 rounded" />
+                <Skeleton className="w-24 h-8 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 lg:mt-0">
+          <Skeleton className="h-52 w-full rounded-2xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoginPrompt({ onLogin }: { onLogin: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="mt-4 bg-primary/5 border border-primary/20 rounded-2xl p-5 text-center"
+      data-ocid="cart-login-prompt"
+    >
+      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+        <Lock className="w-5 h-5 text-primary" strokeWidth={1.5} />
+      </div>
+      <p className="font-semibold text-foreground text-sm mb-1">
+        Login to Checkout
+      </p>
+      <p className="text-muted-foreground text-xs mb-4">
+        Sign in with Internet Identity to securely place your order.
+      </p>
+      <Button
+        onClick={onLogin}
+        className="w-full h-11 text-sm font-semibold btn-accent gap-2 rounded-xl"
+        data-ocid="cart-login-btn"
+      >
+        <User className="w-4 h-4" />
+        Login to Continue
+      </Button>
+    </motion.div>
+  );
+}
+
 export default function Cart() {
   const { items, updateQuantity, removeItem, cartTotal } = useCart();
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+  const [hydrated, setHydrated] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Zustand persist hydration — show skeleton until store is ready
+  useEffect(() => {
+    const timer = setTimeout(() => setHydrated(true), 320);
+    return () => clearTimeout(timer);
+  }, []);
 
   const deliveryFee =
     items.length > 0 && cartTotal < BigInt(500) ? BigInt(40) : BigInt(0);
   const grandTotal = cartTotal + deliveryFee;
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    navigate({ to: "/checkout" });
+  };
+
+  if (!hydrated) {
+    return <CartSkeleton />;
+  }
 
   if (items.length === 0) {
     return (
@@ -29,23 +120,21 @@ export default function Cart() {
         data-ocid="cart-empty-state"
       >
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
           className="mb-6"
         >
-          <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-            <ShoppingCart
-              className="w-10 h-10 text-muted-foreground"
-              strokeWidth={1.5}
-            />
+          <div className="w-28 h-28 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-5 shadow-inner">
+            <ShoppingBag className="w-12 h-12 text-accent" strokeWidth={1.5} />
           </div>
           <h2 className="font-display text-2xl font-bold text-foreground mb-2">
             Your cart is empty
           </h2>
-          <p className="text-muted-foreground mb-6 max-w-xs">
-            Looks like you haven't added any dairy products yet. Explore our
-            fresh collection!
+          <p className="text-muted-foreground mb-6 max-w-xs text-sm leading-relaxed">
+            Looks like you haven't added any dairy products yet.
+            <br />
+            Explore our fresh collection!
           </p>
         </motion.div>
         <Link to="/products">
@@ -53,8 +142,13 @@ export default function Cart() {
             className="btn-accent gap-2 h-12 px-8 text-base"
             data-ocid="cart-explore-btn"
           >
-            Explore Products
+            Start Shopping
             <ArrowRight className="w-4 h-4" />
+          </Button>
+        </Link>
+        <Link to="/" className="mt-3">
+          <Button variant="ghost" className="text-sm text-muted-foreground">
+            Back to Home
           </Button>
         </Link>
       </div>
@@ -62,7 +156,7 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" data-ocid="cart-page">
       <div className="max-w-2xl mx-auto px-4 py-6 lg:max-w-5xl">
         {/* Header */}
         <motion.div
@@ -74,7 +168,7 @@ export default function Cart() {
             Your Cart
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {items.length} {items.length === 1 ? "item" : "items"}
+            {items.length} {items.length === 1 ? "item" : "items"} in your bag
           </p>
         </motion.div>
 
@@ -97,7 +191,7 @@ export default function Cart() {
                   <div className="w-20 h-20 rounded-xl bg-muted flex-shrink-0 overflow-hidden flex items-center justify-center">
                     <ProductPackageSVG
                       packagingKey={item.imageUrl}
-                      productName={item.productName}
+                      productName={item.name}
                       size="sm"
                       className="w-16 h-16"
                     />
@@ -106,10 +200,13 @@ export default function Cart() {
                   {/* Product Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground text-sm leading-tight truncate">
-                      {item.productName}
+                      {item.name}
                     </h3>
                     <p className="text-muted-foreground text-xs mt-0.5">
-                      {item.productNameHi}
+                      {item.nameHindi}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                      Yadav Dairy
                     </p>
                     {item.packagingType && (
                       <Badge variant="secondary" className="mt-1 text-xs gap-1">
@@ -132,8 +229,8 @@ export default function Cart() {
                     <button
                       type="button"
                       onClick={() => removeItem(item.productId)}
-                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                      aria-label={`Remove ${item.productName}`}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded-lg hover:bg-destructive/10"
+                      aria-label={`Remove ${item.name}`}
                       data-ocid={`cart-remove-${item.productId}`}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -155,6 +252,7 @@ export default function Cart() {
                         initial={{ scale: 1.3 }}
                         animate={{ scale: 1 }}
                         className="w-6 text-center font-bold text-sm"
+                        data-ocid={`cart-qty-${item.productId}`}
                       >
                         {item.quantity}
                       </motion.span>
@@ -174,6 +272,19 @@ export default function Cart() {
                 </motion.div>
               ))}
             </AnimatePresence>
+
+            {/* Continue Shopping */}
+            <div className="pt-2">
+              <Link to="/products">
+                <Button
+                  variant="ghost"
+                  className="text-sm text-muted-foreground gap-1.5 pl-0 hover:text-foreground"
+                  data-ocid="cart-continue-link"
+                >
+                  ← Continue Shopping
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Order Summary */}
@@ -192,7 +303,9 @@ export default function Cart() {
               </h2>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="text-muted-foreground">
+                    Subtotal ({items.reduce((s, i) => s + i.quantity, 0)} items)
+                  </span>
                   <span className="font-medium">{formatPrice(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -205,15 +318,15 @@ export default function Cart() {
                     }
                   >
                     {deliveryFee === BigInt(0)
-                      ? "FREE"
+                      ? "FREE 🎉"
                       : formatPrice(deliveryFee)}
                   </span>
                 </div>
                 {deliveryFee > BigInt(0) && (
-                  <p className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
+                  <div className="bg-accent/8 border border-accent/20 rounded-xl px-3 py-2 text-xs text-accent font-medium">
                     Add {formatPrice(BigInt(500) - cartTotal)} more for free
                     delivery
-                  </p>
+                  </div>
                 )}
                 <Separator />
                 <div className="flex justify-between font-bold text-base">
@@ -222,24 +335,24 @@ export default function Cart() {
                 </div>
               </div>
 
-              <Link to="/checkout">
-                <Button
-                  className="w-full mt-5 h-12 text-base font-semibold btn-accent gap-2 rounded-xl"
-                  data-ocid="cart-checkout-btn"
-                >
-                  Proceed to Checkout
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
+              <Button
+                onClick={handleCheckout}
+                className="w-full mt-5 h-12 text-base font-semibold btn-accent gap-2 rounded-xl group"
+                data-ocid="cart-checkout-btn"
+              >
+                Proceed to Checkout
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Button>
 
-              <Link to="/products">
-                <Button
-                  variant="ghost"
-                  className="w-full mt-2 text-sm text-muted-foreground"
-                >
-                  Continue Shopping
-                </Button>
-              </Link>
+              <AnimatePresence>
+                {showLoginPrompt && !isAuthenticated && (
+                  <LoginPrompt onLogin={login} />
+                )}
+              </AnimatePresence>
+
+              <p className="text-center text-xs text-muted-foreground mt-3">
+                🔒 Secure checkout. Free returns.
+              </p>
             </div>
           </motion.div>
         </div>

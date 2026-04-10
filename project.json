@@ -1,22 +1,29 @@
 {
-  "overview": "Yadav Dairy is a modern dairy e-commerce platform with a complete product catalog spanning 10 categories, smart search and filters, a shopping cart, mock checkout, and an admin panel — all styled with a clean Zomato/Swiggy-inspired mobile-first UI.",
+  "overview": "Yadav Dairy is a premium full-stack dairy e-commerce app with a Zomato/Swiggy-inspired UI. Features 60+ products with unique branded SVG packaging, bilingual names (English + Hindi), Internet Identity authentication, full cart/checkout flow, order management, admin panel, wishlist, dark mode, and search with filters.",
   "features": [
-    "Full dairy product catalog (10 categories, 60+ products with English + Hindi names)",
-    "Homepage with hero banner, category carousel, featured & trending products",
-    "Product detail pages with ratings, stock status, and packaging info",
-    "Search with category, price, and packaging filters",
-    "Shopping cart with real-time totals and checkout flow",
-    "Admin panel with product/category CRUD and order management",
-    "Mobile-first responsive design with smooth animations"
+    "60+ dairy products with unique SVG packaging visuals — pouches, tetra packs, jars, boxes, tubs",
+    "All packaging visibly branded 'Yadav Dairy' — zero external brands",
+    "Bilingual product names: English + Hindi on every card",
+    "Zomato/Swiggy-style UI: sticky header, floating cart, smooth animations",
+    "Homepage: hero banner, category carousel, Trending/Best Sellers/Fresh Arrivals/Recommended sections",
+    "Internet Identity login with protected Cart, Orders, and Profile routes",
+    "Full cart/checkout flow: address form, COD + mock payment, order confirmation",
+    "Order history with Pending/Delivered status",
+    "Wishlist with heart icon, dark mode toggle, skeleton loading",
+    "Admin panel: manage products, categories, and orders",
+    "Search autocomplete + filters by category, price, packaging type, dairy type",
+    "Customer support: phone/email in header/footer, Contact Us page, live chat UI"
   ],
   "category": "e-commerce",
   "tags": [
     "dairy",
     "e-commerce",
-    "shopping",
-    "admin-panel",
+    "food",
+    "grocery",
+    "hindi",
+    "bilingual",
     "mobile-first",
-    "product-catalog"
+    "dark-mode"
   ],
-  "last_updated": "2026-04-09T12:03:54.679Z"
+  "last_updated": "2026-04-09T20:30:07.584Z"
 }

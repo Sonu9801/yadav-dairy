@@ -140,10 +140,11 @@ export default function Admin() {
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
-                    {order.customerName}
+                    Order #{order.id.toString().slice(-6)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {formatRelativeTime(order.createdAt)} · {order.city}
+                    {formatRelativeTime(order.createdAt)} · {order.items.length}{" "}
+                    items
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">

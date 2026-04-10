@@ -8,72 +8,100 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const CreateCategoryArgs = IDL.Record({
-  'nameHi' : IDL.Text,
-  'sortOrder' : IDL.Nat,
+export const ContactMessageId = IDL.Nat;
+export const Timestamp = IDL.Int;
+export const ContactMessage = IDL.Record({
+  'id' : ContactMessageId,
   'name' : IDL.Text,
-  'description' : IDL.Text,
-  'iconEmoji' : IDL.Text,
+  'createdAt' : Timestamp,
+  'email' : IDL.Text,
+  'message' : IDL.Text,
+});
+export const ProductId = IDL.Nat;
+export const SubmitReviewArgs = IDL.Record({
+  'productId' : ProductId,
+  'reviewerName' : IDL.Text,
+  'comment' : IDL.Text,
+  'rating' : IDL.Nat,
+});
+export const ReviewId = IDL.Nat;
+export const Review = IDL.Record({
+  'id' : ReviewId,
+  'createdAt' : Timestamp,
+  'productId' : ProductId,
+  'reviewerName' : IDL.Text,
+  'comment' : IDL.Text,
+  'reviewerPrincipal' : IDL.Principal,
+  'rating' : IDL.Nat,
+});
+export const CreateCategoryArgs = IDL.Record({
+  'nameHindi' : IDL.Text,
+  'sortOrder' : IDL.Nat,
+  'icon' : IDL.Text,
+  'name' : IDL.Text,
+  'colorClass' : IDL.Text,
 });
 export const CategoryId = IDL.Nat;
 export const Category = IDL.Record({
   'id' : CategoryId,
-  'nameHi' : IDL.Text,
+  'nameHindi' : IDL.Text,
   'sortOrder' : IDL.Nat,
+  'icon' : IDL.Text,
+  'name' : IDL.Text,
+  'colorClass' : IDL.Text,
+});
+export const CreateProductArgs = IDL.Record({
+  'inStock' : IDL.Bool,
+  'nameHindi' : IDL.Text,
+  'packagingType' : IDL.Text,
+  'originalPrice' : IDL.Nat,
+  'subcategory' : IDL.Text,
   'name' : IDL.Text,
   'description' : IDL.Text,
-  'iconEmoji' : IDL.Text,
-});
-export const SubcategoryId = IDL.Nat;
-export const CreateProductArgs = IDL.Record({
-  'categoryId' : CategoryId,
-  'nameEn' : IDL.Text,
-  'nameHi' : IDL.Text,
-  'inStock' : IDL.Bool,
-  'packagingType' : IDL.Text,
-  'originalPrice' : IDL.Nat,
-  'fatContent' : IDL.Text,
-  'description' : IDL.Text,
-  'stockCount' : IDL.Nat,
+  'isFreshArrival' : IDL.Bool,
+  'stock' : IDL.Nat,
   'imageUrl' : IDL.Text,
   'isFeatured' : IDL.Bool,
-  'subcategoryId' : SubcategoryId,
+  'quantity' : IDL.Text,
+  'category' : IDL.Text,
   'brand' : IDL.Text,
   'price' : IDL.Nat,
+  'isBestSeller' : IDL.Bool,
   'isTrending' : IDL.Bool,
 });
-export const ProductId = IDL.Nat;
-export const Timestamp = IDL.Int;
 export const Product = IDL.Record({
   'id' : ProductId,
-  'categoryId' : CategoryId,
-  'nameEn' : IDL.Text,
-  'nameHi' : IDL.Text,
   'inStock' : IDL.Bool,
+  'nameHindi' : IDL.Text,
   'packagingType' : IDL.Text,
   'originalPrice' : IDL.Nat,
+  'subcategory' : IDL.Text,
+  'name' : IDL.Text,
   'createdAt' : Timestamp,
-  'fatContent' : IDL.Text,
   'description' : IDL.Text,
-  'stockCount' : IDL.Nat,
+  'isFreshArrival' : IDL.Bool,
+  'stock' : IDL.Nat,
   'imageUrl' : IDL.Text,
   'isFeatured' : IDL.Bool,
-  'subcategoryId' : SubcategoryId,
+  'quantity' : IDL.Text,
+  'category' : IDL.Text,
   'brand' : IDL.Text,
   'rating' : IDL.Float64,
   'price' : IDL.Nat,
   'reviewCount' : IDL.Nat,
+  'isBestSeller' : IDL.Bool,
   'isTrending' : IDL.Bool,
 });
 export const CreateSubcategoryArgs = IDL.Record({
   'categoryId' : CategoryId,
-  'nameHi' : IDL.Text,
+  'nameHindi' : IDL.Text,
   'name' : IDL.Text,
 });
+export const SubcategoryId = IDL.Nat;
 export const Subcategory = IDL.Record({
   'id' : SubcategoryId,
   'categoryId' : CategoryId,
-  'nameHi' : IDL.Text,
+  'nameHindi' : IDL.Text,
   'name' : IDL.Text,
 });
 export const OrderId = IDL.Nat;
@@ -91,6 +119,7 @@ export const PaymentMethod = IDL.Variant({
   'card' : IDL.Null,
   'netBanking' : IDL.Null,
 });
+export const UserId = IDL.Principal;
 export const OrderItem = IDL.Record({
   'productId' : ProductId,
   'productName' : IDL.Text,
@@ -99,76 +128,104 @@ export const OrderItem = IDL.Record({
 });
 export const Order = IDL.Record({
   'id' : OrderId,
-  'customerName' : IDL.Text,
   'status' : OrderStatus,
   'paymentMethod' : PaymentMethod,
-  'customerPhone' : IDL.Text,
-  'city' : IDL.Text,
+  'deliveryFee' : IDL.Nat,
+  'userId' : UserId,
   'createdAt' : Timestamp,
   'totalAmount' : IDL.Nat,
-  'address' : IDL.Text,
+  'shippingAddress' : IDL.Text,
   'items' : IDL.Vec(OrderItem),
-  'pincode' : IDL.Text,
+});
+export const UserProfile = IDL.Record({
+  'principal' : IDL.Principal,
+  'displayName' : IDL.Text,
+  'createdAt' : Timestamp,
+  'email' : IDL.Text,
+  'updatedAt' : Timestamp,
+  'address' : IDL.Text,
+  'phone' : IDL.Text,
+});
+export const WishlistItem = IDL.Record({
+  'productId' : ProductId,
+  'addedAt' : Timestamp,
 });
 export const PlaceOrderArgs = IDL.Record({
-  'customerName' : IDL.Text,
   'paymentMethod' : PaymentMethod,
-  'customerPhone' : IDL.Text,
-  'city' : IDL.Text,
+  'deliveryFee' : IDL.Nat,
   'totalAmount' : IDL.Nat,
-  'address' : IDL.Text,
+  'shippingAddress' : IDL.Text,
   'items' : IDL.Vec(OrderItem),
-  'pincode' : IDL.Text,
 });
 export const UpdateCategoryArgs = IDL.Record({
   'id' : CategoryId,
-  'nameHi' : IDL.Text,
+  'nameHindi' : IDL.Text,
   'sortOrder' : IDL.Nat,
+  'icon' : IDL.Text,
   'name' : IDL.Text,
-  'description' : IDL.Text,
-  'iconEmoji' : IDL.Text,
+  'colorClass' : IDL.Text,
 });
 export const UpdateProductArgs = IDL.Record({
   'id' : ProductId,
-  'categoryId' : CategoryId,
-  'nameEn' : IDL.Text,
-  'nameHi' : IDL.Text,
   'inStock' : IDL.Bool,
+  'nameHindi' : IDL.Text,
   'packagingType' : IDL.Text,
   'originalPrice' : IDL.Nat,
-  'fatContent' : IDL.Text,
+  'subcategory' : IDL.Text,
+  'name' : IDL.Text,
   'description' : IDL.Text,
-  'stockCount' : IDL.Nat,
+  'isFreshArrival' : IDL.Bool,
+  'stock' : IDL.Nat,
   'imageUrl' : IDL.Text,
   'isFeatured' : IDL.Bool,
-  'subcategoryId' : SubcategoryId,
+  'quantity' : IDL.Text,
+  'category' : IDL.Text,
   'brand' : IDL.Text,
   'price' : IDL.Nat,
+  'isBestSeller' : IDL.Bool,
   'isTrending' : IDL.Bool,
+});
+export const UpdateProfileArgs = IDL.Record({
+  'displayName' : IDL.Text,
+  'email' : IDL.Text,
+  'address' : IDL.Text,
+  'phone' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
+  'addContact' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [ContactMessage], []),
+  'addReview' : IDL.Func([SubmitReviewArgs], [Review], []),
+  'addToWishlist' : IDL.Func([ProductId], [IDL.Bool], []),
   'createCategory' : IDL.Func([CreateCategoryArgs], [Category], []),
   'createProduct' : IDL.Func([CreateProductArgs], [Product], []),
   'createSubcategory' : IDL.Func([CreateSubcategoryArgs], [Subcategory], []),
   'deleteCategory' : IDL.Func([CategoryId], [IDL.Bool], []),
   'deleteProduct' : IDL.Func([ProductId], [IDL.Bool], []),
+  'deleteReview' : IDL.Func([ReviewId, ProductId], [IDL.Bool], []),
   'deleteSubcategory' : IDL.Func([SubcategoryId], [IDL.Bool], []),
+  'deleteUserProfile' : IDL.Func([], [IDL.Bool], []),
   'filterProducts' : IDL.Func(
-      [IDL.Opt(CategoryId), IDL.Opt(IDL.Nat), IDL.Opt(IDL.Text)],
+      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat), IDL.Opt(IDL.Text)],
       [IDL.Vec(Product)],
       ['query'],
     ),
-  'getAdmin' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
+  'getAdminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
   'getCategory' : IDL.Func([CategoryId], [IDL.Opt(Category)], ['query']),
   'getOrder' : IDL.Func([OrderId], [IDL.Opt(Order)], ['query']),
   'getProduct' : IDL.Func([ProductId], [IDL.Opt(Product)], ['query']),
+  'getProductReviews' : IDL.Func([ProductId], [IDL.Vec(Review)], ['query']),
+  'getUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getWishlist' : IDL.Func([], [IDL.Vec(WishlistItem)], ['query']),
+  'listAllReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
+  'listBestSellers' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'listCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
+  'listContacts' : IDL.Func([], [IDL.Vec(ContactMessage)], ['query']),
   'listFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
-  'listOrders' : IDL.Func([], [IDL.Vec(Order)], []),
+  'listFreshArrivals' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'listOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
   'listProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'listProductsByCategory' : IDL.Func(
-      [CategoryId],
+      [IDL.Text],
       [IDL.Vec(Product)],
       ['query'],
     ),
@@ -180,82 +237,112 @@ export const idlService = IDL.Service({
     ),
   'listTrendingProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'placeOrder' : IDL.Func([PlaceOrderArgs], [Order], []),
+  'removeFromWishlist' : IDL.Func([ProductId], [IDL.Bool], []),
   'searchProducts' : IDL.Func([IDL.Text], [IDL.Vec(Product)], ['query']),
-  'setAdmin' : IDL.Func([], [], []),
+  'setAdminPrincipal' : IDL.Func([], [], []),
   'updateCategory' : IDL.Func([UpdateCategoryArgs], [IDL.Opt(Category)], []),
   'updateOrderStatus' : IDL.Func([OrderId, OrderStatus], [IDL.Opt(Order)], []),
   'updateProduct' : IDL.Func([UpdateProductArgs], [IDL.Opt(Product)], []),
+  'updateUserProfile' : IDL.Func([UpdateProfileArgs], [UserProfile], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const CreateCategoryArgs = IDL.Record({
-    'nameHi' : IDL.Text,
-    'sortOrder' : IDL.Nat,
+  const ContactMessageId = IDL.Nat;
+  const Timestamp = IDL.Int;
+  const ContactMessage = IDL.Record({
+    'id' : ContactMessageId,
     'name' : IDL.Text,
-    'description' : IDL.Text,
-    'iconEmoji' : IDL.Text,
+    'createdAt' : Timestamp,
+    'email' : IDL.Text,
+    'message' : IDL.Text,
+  });
+  const ProductId = IDL.Nat;
+  const SubmitReviewArgs = IDL.Record({
+    'productId' : ProductId,
+    'reviewerName' : IDL.Text,
+    'comment' : IDL.Text,
+    'rating' : IDL.Nat,
+  });
+  const ReviewId = IDL.Nat;
+  const Review = IDL.Record({
+    'id' : ReviewId,
+    'createdAt' : Timestamp,
+    'productId' : ProductId,
+    'reviewerName' : IDL.Text,
+    'comment' : IDL.Text,
+    'reviewerPrincipal' : IDL.Principal,
+    'rating' : IDL.Nat,
+  });
+  const CreateCategoryArgs = IDL.Record({
+    'nameHindi' : IDL.Text,
+    'sortOrder' : IDL.Nat,
+    'icon' : IDL.Text,
+    'name' : IDL.Text,
+    'colorClass' : IDL.Text,
   });
   const CategoryId = IDL.Nat;
   const Category = IDL.Record({
     'id' : CategoryId,
-    'nameHi' : IDL.Text,
+    'nameHindi' : IDL.Text,
     'sortOrder' : IDL.Nat,
+    'icon' : IDL.Text,
+    'name' : IDL.Text,
+    'colorClass' : IDL.Text,
+  });
+  const CreateProductArgs = IDL.Record({
+    'inStock' : IDL.Bool,
+    'nameHindi' : IDL.Text,
+    'packagingType' : IDL.Text,
+    'originalPrice' : IDL.Nat,
+    'subcategory' : IDL.Text,
     'name' : IDL.Text,
     'description' : IDL.Text,
-    'iconEmoji' : IDL.Text,
-  });
-  const SubcategoryId = IDL.Nat;
-  const CreateProductArgs = IDL.Record({
-    'categoryId' : CategoryId,
-    'nameEn' : IDL.Text,
-    'nameHi' : IDL.Text,
-    'inStock' : IDL.Bool,
-    'packagingType' : IDL.Text,
-    'originalPrice' : IDL.Nat,
-    'fatContent' : IDL.Text,
-    'description' : IDL.Text,
-    'stockCount' : IDL.Nat,
+    'isFreshArrival' : IDL.Bool,
+    'stock' : IDL.Nat,
     'imageUrl' : IDL.Text,
     'isFeatured' : IDL.Bool,
-    'subcategoryId' : SubcategoryId,
+    'quantity' : IDL.Text,
+    'category' : IDL.Text,
     'brand' : IDL.Text,
     'price' : IDL.Nat,
+    'isBestSeller' : IDL.Bool,
     'isTrending' : IDL.Bool,
   });
-  const ProductId = IDL.Nat;
-  const Timestamp = IDL.Int;
   const Product = IDL.Record({
     'id' : ProductId,
-    'categoryId' : CategoryId,
-    'nameEn' : IDL.Text,
-    'nameHi' : IDL.Text,
     'inStock' : IDL.Bool,
+    'nameHindi' : IDL.Text,
     'packagingType' : IDL.Text,
     'originalPrice' : IDL.Nat,
+    'subcategory' : IDL.Text,
+    'name' : IDL.Text,
     'createdAt' : Timestamp,
-    'fatContent' : IDL.Text,
     'description' : IDL.Text,
-    'stockCount' : IDL.Nat,
+    'isFreshArrival' : IDL.Bool,
+    'stock' : IDL.Nat,
     'imageUrl' : IDL.Text,
     'isFeatured' : IDL.Bool,
-    'subcategoryId' : SubcategoryId,
+    'quantity' : IDL.Text,
+    'category' : IDL.Text,
     'brand' : IDL.Text,
     'rating' : IDL.Float64,
     'price' : IDL.Nat,
     'reviewCount' : IDL.Nat,
+    'isBestSeller' : IDL.Bool,
     'isTrending' : IDL.Bool,
   });
   const CreateSubcategoryArgs = IDL.Record({
     'categoryId' : CategoryId,
-    'nameHi' : IDL.Text,
+    'nameHindi' : IDL.Text,
     'name' : IDL.Text,
   });
+  const SubcategoryId = IDL.Nat;
   const Subcategory = IDL.Record({
     'id' : SubcategoryId,
     'categoryId' : CategoryId,
-    'nameHi' : IDL.Text,
+    'nameHindi' : IDL.Text,
     'name' : IDL.Text,
   });
   const OrderId = IDL.Nat;
@@ -273,6 +360,7 @@ export const idlFactory = ({ IDL }) => {
     'card' : IDL.Null,
     'netBanking' : IDL.Null,
   });
+  const UserId = IDL.Principal;
   const OrderItem = IDL.Record({
     'productId' : ProductId,
     'productName' : IDL.Text,
@@ -281,76 +369,108 @@ export const idlFactory = ({ IDL }) => {
   });
   const Order = IDL.Record({
     'id' : OrderId,
-    'customerName' : IDL.Text,
     'status' : OrderStatus,
     'paymentMethod' : PaymentMethod,
-    'customerPhone' : IDL.Text,
-    'city' : IDL.Text,
+    'deliveryFee' : IDL.Nat,
+    'userId' : UserId,
     'createdAt' : Timestamp,
     'totalAmount' : IDL.Nat,
-    'address' : IDL.Text,
+    'shippingAddress' : IDL.Text,
     'items' : IDL.Vec(OrderItem),
-    'pincode' : IDL.Text,
+  });
+  const UserProfile = IDL.Record({
+    'principal' : IDL.Principal,
+    'displayName' : IDL.Text,
+    'createdAt' : Timestamp,
+    'email' : IDL.Text,
+    'updatedAt' : Timestamp,
+    'address' : IDL.Text,
+    'phone' : IDL.Text,
+  });
+  const WishlistItem = IDL.Record({
+    'productId' : ProductId,
+    'addedAt' : Timestamp,
   });
   const PlaceOrderArgs = IDL.Record({
-    'customerName' : IDL.Text,
     'paymentMethod' : PaymentMethod,
-    'customerPhone' : IDL.Text,
-    'city' : IDL.Text,
+    'deliveryFee' : IDL.Nat,
     'totalAmount' : IDL.Nat,
-    'address' : IDL.Text,
+    'shippingAddress' : IDL.Text,
     'items' : IDL.Vec(OrderItem),
-    'pincode' : IDL.Text,
   });
   const UpdateCategoryArgs = IDL.Record({
     'id' : CategoryId,
-    'nameHi' : IDL.Text,
+    'nameHindi' : IDL.Text,
     'sortOrder' : IDL.Nat,
+    'icon' : IDL.Text,
     'name' : IDL.Text,
-    'description' : IDL.Text,
-    'iconEmoji' : IDL.Text,
+    'colorClass' : IDL.Text,
   });
   const UpdateProductArgs = IDL.Record({
     'id' : ProductId,
-    'categoryId' : CategoryId,
-    'nameEn' : IDL.Text,
-    'nameHi' : IDL.Text,
     'inStock' : IDL.Bool,
+    'nameHindi' : IDL.Text,
     'packagingType' : IDL.Text,
     'originalPrice' : IDL.Nat,
-    'fatContent' : IDL.Text,
+    'subcategory' : IDL.Text,
+    'name' : IDL.Text,
     'description' : IDL.Text,
-    'stockCount' : IDL.Nat,
+    'isFreshArrival' : IDL.Bool,
+    'stock' : IDL.Nat,
     'imageUrl' : IDL.Text,
     'isFeatured' : IDL.Bool,
-    'subcategoryId' : SubcategoryId,
+    'quantity' : IDL.Text,
+    'category' : IDL.Text,
     'brand' : IDL.Text,
     'price' : IDL.Nat,
+    'isBestSeller' : IDL.Bool,
     'isTrending' : IDL.Bool,
+  });
+  const UpdateProfileArgs = IDL.Record({
+    'displayName' : IDL.Text,
+    'email' : IDL.Text,
+    'address' : IDL.Text,
+    'phone' : IDL.Text,
   });
   
   return IDL.Service({
+    'addContact' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text],
+        [ContactMessage],
+        [],
+      ),
+    'addReview' : IDL.Func([SubmitReviewArgs], [Review], []),
+    'addToWishlist' : IDL.Func([ProductId], [IDL.Bool], []),
     'createCategory' : IDL.Func([CreateCategoryArgs], [Category], []),
     'createProduct' : IDL.Func([CreateProductArgs], [Product], []),
     'createSubcategory' : IDL.Func([CreateSubcategoryArgs], [Subcategory], []),
     'deleteCategory' : IDL.Func([CategoryId], [IDL.Bool], []),
     'deleteProduct' : IDL.Func([ProductId], [IDL.Bool], []),
+    'deleteReview' : IDL.Func([ReviewId, ProductId], [IDL.Bool], []),
     'deleteSubcategory' : IDL.Func([SubcategoryId], [IDL.Bool], []),
+    'deleteUserProfile' : IDL.Func([], [IDL.Bool], []),
     'filterProducts' : IDL.Func(
-        [IDL.Opt(CategoryId), IDL.Opt(IDL.Nat), IDL.Opt(IDL.Text)],
+        [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat), IDL.Opt(IDL.Text)],
         [IDL.Vec(Product)],
         ['query'],
       ),
-    'getAdmin' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
+    'getAdminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
     'getCategory' : IDL.Func([CategoryId], [IDL.Opt(Category)], ['query']),
     'getOrder' : IDL.Func([OrderId], [IDL.Opt(Order)], ['query']),
     'getProduct' : IDL.Func([ProductId], [IDL.Opt(Product)], ['query']),
+    'getProductReviews' : IDL.Func([ProductId], [IDL.Vec(Review)], ['query']),
+    'getUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getWishlist' : IDL.Func([], [IDL.Vec(WishlistItem)], ['query']),
+    'listAllReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
+    'listBestSellers' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'listCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
+    'listContacts' : IDL.Func([], [IDL.Vec(ContactMessage)], ['query']),
     'listFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
-    'listOrders' : IDL.Func([], [IDL.Vec(Order)], []),
+    'listFreshArrivals' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'listOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
     'listProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'listProductsByCategory' : IDL.Func(
-        [CategoryId],
+        [IDL.Text],
         [IDL.Vec(Product)],
         ['query'],
       ),
@@ -362,8 +482,9 @@ export const idlFactory = ({ IDL }) => {
       ),
     'listTrendingProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'placeOrder' : IDL.Func([PlaceOrderArgs], [Order], []),
+    'removeFromWishlist' : IDL.Func([ProductId], [IDL.Bool], []),
     'searchProducts' : IDL.Func([IDL.Text], [IDL.Vec(Product)], ['query']),
-    'setAdmin' : IDL.Func([], [], []),
+    'setAdminPrincipal' : IDL.Func([], [], []),
     'updateCategory' : IDL.Func([UpdateCategoryArgs], [IDL.Opt(Category)], []),
     'updateOrderStatus' : IDL.Func(
         [OrderId, OrderStatus],
@@ -371,6 +492,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateProduct' : IDL.Func([UpdateProductArgs], [IDL.Opt(Product)], []),
+    'updateUserProfile' : IDL.Func([UpdateProfileArgs], [UserProfile], []),
   });
 };
 

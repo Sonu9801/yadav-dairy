@@ -16,43 +16,46 @@ module {
   };
 
   public func createCategory(categories : List.List<Category>, nextId : Nat, args : Types.CreateCategoryArgs) : Category {
-    let cat : Category = {
+    let c : Category = {
       id = nextId;
       name = args.name;
-      nameHi = args.nameHi;
-      description = args.description;
-      iconEmoji = args.iconEmoji;
+      nameHindi = args.nameHindi;
+      icon = args.icon;
+      colorClass = args.colorClass;
       sortOrder = args.sortOrder;
     };
-    categories.add(cat);
-    cat;
+    categories.add(c);
+    c;
   };
 
   public func updateCategory(categories : List.List<Category>, args : Types.UpdateCategoryArgs) : ?Category {
-    var updated : ?Category = null;
-    categories.mapInPlace(func(c) {
-      if (c.id == args.id) {
-        let u : Category = {
-          id = c.id;
+    switch (categories.findIndex(func(c) { c.id == args.id })) {
+      case null null;
+      case (?i) {
+        let updated : Category = {
+          id = args.id;
           name = args.name;
-          nameHi = args.nameHi;
-          description = args.description;
-          iconEmoji = args.iconEmoji;
+          nameHindi = args.nameHindi;
+          icon = args.icon;
+          colorClass = args.colorClass;
           sortOrder = args.sortOrder;
         };
-        updated := ?u;
-        u;
-      } else { c };
-    });
-    updated;
+        categories.put(i, updated);
+        ?updated;
+      };
+    };
   };
 
   public func deleteCategory(categories : List.List<Category>, id : Types.CategoryId) : Bool {
-    let sizeBefore = categories.size();
-    let filtered = categories.filter(func(c) { c.id != id });
-    categories.clear();
-    categories.append(filtered);
-    categories.size() < sizeBefore;
+    switch (categories.findIndex(func(c) { c.id == id })) {
+      case null false;
+      case (?i) {
+        let filtered = categories.filter(func(c) { c.id != id });
+        categories.clear();
+        categories.append(filtered);
+        true;
+      };
+    };
   };
 
   public func listSubcategories(subcategories : List.List<Subcategory>) : [Subcategory] {
@@ -64,22 +67,26 @@ module {
   };
 
   public func createSubcategory(subcategories : List.List<Subcategory>, nextId : Nat, args : Types.CreateSubcategoryArgs) : Subcategory {
-    let sub : Subcategory = {
+    let s : Subcategory = {
       id = nextId;
       categoryId = args.categoryId;
       name = args.name;
-      nameHi = args.nameHi;
+      nameHindi = args.nameHindi;
     };
-    subcategories.add(sub);
-    sub;
+    subcategories.add(s);
+    s;
   };
 
   public func deleteSubcategory(subcategories : List.List<Subcategory>, id : Types.SubcategoryId) : Bool {
-    let sizeBefore = subcategories.size();
-    let filtered = subcategories.filter(func(s) { s.id != id });
-    subcategories.clear();
-    subcategories.append(filtered);
-    subcategories.size() < sizeBefore;
+    switch (subcategories.findIndex(func(s) { s.id == id })) {
+      case null false;
+      case (?_) {
+        let filtered = subcategories.filter(func(s) { s.id != id });
+        subcategories.clear();
+        subcategories.append(filtered);
+        true;
+      };
+    };
   };
 
   public func listProducts(products : List.List<Product>) : [Product] {
@@ -98,94 +105,119 @@ module {
     products.filter(func(p) { p.isTrending }).toArray();
   };
 
-  public func listProductsByCategory(products : List.List<Product>, categoryId : Types.CategoryId) : [Product] {
-    products.filter(func(p) { p.categoryId == categoryId }).toArray();
+  public func listBestSellers(products : List.List<Product>) : [Product] {
+    products.filter(func(p) { p.isBestSeller }).toArray();
+  };
+
+  public func listFreshArrivals(products : List.List<Product>) : [Product] {
+    products.filter(func(p) { p.isFreshArrival }).toArray();
+  };
+
+  public func listProductsByCategory(products : List.List<Product>, category : Text) : [Product] {
+    products.filter(func(p) { p.category == category }).toArray();
   };
 
   public func searchProducts(products : List.List<Product>, term : Text) : [Product] {
     let lower = term.toLower();
     products.filter(func(p) {
-      p.nameEn.toLower().contains(#text lower) or p.nameHi.toLower().contains(#text lower)
+      p.name.toLower().contains(#text lower) or
+      p.nameHindi.toLower().contains(#text lower) or
+      p.description.toLower().contains(#text lower) or
+      p.category.toLower().contains(#text lower)
     }).toArray();
   };
 
   public func filterProducts(
     products : List.List<Product>,
-    categoryId : ?Types.CategoryId,
+    category : ?Text,
     maxPrice : ?Nat,
     packagingType : ?Text,
   ) : [Product] {
     products.filter(func(p) {
-      let catOk = switch (categoryId) { case (?cid) { p.categoryId == cid }; case null { true } };
-      let priceOk = switch (maxPrice) { case (?mp) { p.price <= mp }; case null { true } };
-      let pkgOk = switch (packagingType) { case (?pkg) { p.packagingType == pkg }; case null { true } };
-      catOk and priceOk and pkgOk;
+      let catMatch = switch (category) {
+        case null true;
+        case (?c) p.category == c;
+      };
+      let priceMatch = switch (maxPrice) {
+        case null true;
+        case (?mp) p.price <= mp;
+      };
+      let pkgMatch = switch (packagingType) {
+        case null true;
+        case (?pkg) p.packagingType == pkg;
+      };
+      catMatch and priceMatch and pkgMatch;
     }).toArray();
   };
 
   public func createProduct(products : List.List<Product>, nextId : Nat, args : Types.CreateProductArgs) : Product {
-    let prod : Product = {
+    let p : Product = {
       id = nextId;
-      nameEn = args.nameEn;
-      nameHi = args.nameHi;
+      name = args.name;
+      nameHindi = args.nameHindi;
       brand = args.brand;
       description = args.description;
       price = args.price;
       originalPrice = args.originalPrice;
-      categoryId = args.categoryId;
-      subcategoryId = args.subcategoryId;
+      category = args.category;
+      subcategory = args.subcategory;
       packagingType = args.packagingType;
-      fatContent = args.fatContent;
       imageUrl = args.imageUrl;
+      quantity = args.quantity;
       inStock = args.inStock;
-      stockCount = args.stockCount;
-      rating = 4.0;
+      stock = args.stock;
+      rating = 0.0;
       reviewCount = 0;
       isFeatured = args.isFeatured;
       isTrending = args.isTrending;
+      isBestSeller = args.isBestSeller;
+      isFreshArrival = args.isFreshArrival;
       createdAt = Time.now();
     };
-    products.add(prod);
-    prod;
+    products.add(p);
+    p;
   };
 
   public func updateProduct(products : List.List<Product>, args : Types.UpdateProductArgs) : ?Product {
-    var updated : ?Product = null;
-    products.mapInPlace(func(p) {
-      if (p.id == args.id) {
-        let u : Product = {
-          id = p.id;
-          nameEn = args.nameEn;
-          nameHi = args.nameHi;
+    switch (products.findIndex(func(p) { p.id == args.id })) {
+      case null null;
+      case (?i) {
+        let existing = products.at(i);
+        let updated : Product = {
+          existing with
+          name = args.name;
+          nameHindi = args.nameHindi;
           brand = args.brand;
           description = args.description;
           price = args.price;
           originalPrice = args.originalPrice;
-          categoryId = args.categoryId;
-          subcategoryId = args.subcategoryId;
+          category = args.category;
+          subcategory = args.subcategory;
           packagingType = args.packagingType;
-          fatContent = args.fatContent;
           imageUrl = args.imageUrl;
+          quantity = args.quantity;
           inStock = args.inStock;
-          stockCount = args.stockCount;
+          stock = args.stock;
           isFeatured = args.isFeatured;
           isTrending = args.isTrending;
-          rating = p.rating;
-          reviewCount = p.reviewCount;
-          createdAt = p.createdAt;
+          isBestSeller = args.isBestSeller;
+          isFreshArrival = args.isFreshArrival;
         };
-        updated := ?u;
-        u;
-      } else { p };
-    });
-    updated;
+        products.put(i, updated);
+        ?updated;
+      };
+    };
   };
 
   public func deleteProduct(products : List.List<Product>, id : Types.ProductId) : Bool {
-    let sizeBefore = products.size();
-    let filtered = products.filter(func(p) { p.id != id });
-    products.clear();
-    products.append(filtered);
-    products.size() < sizeBefore;
+    switch (products.findIndex(func(p) { p.id == id })) {
+      case null false;
+      case (?_) {
+        let filtered = products.filter(func(p) { p.id != id });
+        products.clear();
+        products.append(filtered);
+        true;
+      };
+    };
   };
 };

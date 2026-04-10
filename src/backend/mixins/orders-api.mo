@@ -11,10 +11,10 @@ mixin (
   },
 ) {
 
-  // --- Public order placement (guest checkout) ---
+  // --- Authenticated user: place and view own orders ---
 
-  public shared func placeOrder(args : OrderTypes.PlaceOrderArgs) : async OrderTypes.Order {
-    let order = OrdersLib.placeOrder(orders, state.nextOrderId, args);
+  public shared ({ caller }) func placeOrder(args : OrderTypes.PlaceOrderArgs) : async OrderTypes.Order {
+    let order = OrdersLib.placeOrder(orders, state.nextOrderId, caller, args);
     state.nextOrderId += 1;
     order;
   };
@@ -23,12 +23,11 @@ mixin (
     OrdersLib.getOrder(orders, id);
   };
 
-  // --- Admin-only order management ---
-
-  public shared ({ caller }) func listOrders() : async [OrderTypes.Order] {
-    AdminLib.requireAdmin(state.adminPrincipal, caller);
-    OrdersLib.listOrders(orders);
+  public query ({ caller }) func listOrders() : async [OrderTypes.Order] {
+    OrdersLib.listOrdersByUser(orders, caller);
   };
+
+  // --- Admin-only order management ---
 
   public shared ({ caller }) func updateOrderStatus(id : OrderTypes.OrderId, status : OrderTypes.OrderStatus) : async ?OrderTypes.Order {
     AdminLib.requireAdmin(state.adminPrincipal, caller);

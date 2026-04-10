@@ -3,6 +3,7 @@ import Common "common";
 module {
   public type OrderId = Common.OrderId;
   public type ProductId = Common.ProductId;
+  public type UserId = Common.UserId;
   public type Timestamp = Common.Timestamp;
 
   public type OrderStatus = {
@@ -30,26 +31,21 @@ module {
 
   public type Order = {
     id : OrderId;
-    customerName : Text;
-    customerPhone : Text;
-    address : Text;
-    city : Text;
-    pincode : Text;
-    paymentMethod : PaymentMethod;
+    userId : UserId;
     items : [OrderItem];
     totalAmount : Nat;
+    deliveryFee : Nat;
     status : OrderStatus;
+    paymentMethod : PaymentMethod;
+    shippingAddress : Text;
     createdAt : Timestamp;
   };
 
   public type PlaceOrderArgs = {
-    customerName : Text;
-    customerPhone : Text;
-    address : Text;
-    city : Text;
-    pincode : Text;
-    paymentMethod : PaymentMethod;
     items : [OrderItem];
     totalAmount : Nat;
+    deliveryFee : Nat;
+    paymentMethod : PaymentMethod;
+    shippingAddress : Text;
   };
 };

@@ -3,16 +3,39 @@ type CategoryId__14729845 = Nat;
 type CategoryId__891294077 = CategoryId__14729845;
 type Category__403107212 =
   {
-    description : Text;
-    iconEmoji : Text;
+    colorClass : Text;
+    icon : Text;
     id : CategoryId__891294077;
     name : Text;
-    nameHi : Text;
+    nameHindi : Text;
     sortOrder : Nat
   };
 type Category__404427711 = Category__403107212;
+type ContactMessageId__934844011 = Nat;
+type ContactMessage__674376541 =
+  {
+    createdAt : Timestamp__290823615;
+    email : Text;
+    id : ContactMessageId__934844011;
+    message : Text;
+    name : Text
+  };
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type List__415060402<T> = List__790383201<T>;
+type List__790383201<T> =
+  {
+    var blockIndex : Nat__490723111;
+    var blocks : [var [var ?T]];
+    var elementIndex : Nat__490723111
+  };
 type Nat__490723111 = Nat__920180692;
 type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
 type OrderId__197865225 = Nat;
 type OrderId__521176343 = OrderId__197865225;
 type OrderItem__241319351 =
@@ -26,46 +49,59 @@ type OrderStatus__272730104 =
   {#cancelled; #confirmed; #delivered; #pending; #processing; #shipped};
 type Order__141779993 =
   {
-    address : Text;
-    city : Text;
     createdAt : Timestamp__813860109;
-    customerName : Text;
-    customerPhone : Text;
+    deliveryFee : Nat;
     id : OrderId__521176343;
     items : [OrderItem__241319351];
     paymentMethod : PaymentMethod__972042942;
-    pincode : Text;
+    shippingAddress : Text;
     status : OrderStatus__272730104;
-    totalAmount : Nat
+    totalAmount : Nat;
+    userId : UserId__41638867
   };
 type Order__645163560 = Order__141779993;
 type PaymentMethod__972042942 = {#card; #cashOnDelivery; #netBanking; #upi};
 type ProductId__160010635 = Nat;
+type ProductId__181751412 = ProductId__160010635;
 type ProductId__324763372 = ProductId__160010635;
 type ProductId__903190681 = ProductId__160010635;
 type Product__389207432 =
   {
     brand : Text;
-    categoryId : CategoryId__891294077;
+    category : Text;
     createdAt : Timestamp__384207765;
     description : Text;
-    fatContent : Text;
     id : ProductId__324763372;
     imageUrl : Text;
     inStock : Bool;
+    isBestSeller : Bool;
     isFeatured : Bool;
+    isFreshArrival : Bool;
     isTrending : Bool;
-    nameEn : Text;
-    nameHi : Text;
+    name : Text;
+    nameHindi : Text;
     originalPrice : Nat;
     packagingType : Text;
     price : Nat;
+    quantity : Text;
     rating : Float;
     reviewCount : Nat;
-    stockCount : Nat;
-    subcategoryId : SubcategoryId__884790442
+    stock : Nat;
+    subcategory : Text
   };
 type Product__45918276 = Product__389207432;
+type ReviewId__645571333 = Nat;
+type Review__742610882 =
+  {
+    comment : Text;
+    createdAt : Timestamp__290823615;
+    id : ReviewId__645571333;
+    productId : ProductId__181751412;
+    rating : Nat;
+    reviewerName : Text;
+    reviewerPrincipal : Principal
+  };
+type Review__818063886 = Review__742610882;
 type SubcategoryId__884790442 = SubcategoryId__973480342;
 type SubcategoryId__973480342 = Nat;
 type Subcategory__145454756 = Subcategory__869865402;
@@ -74,16 +110,38 @@ type Subcategory__869865402 =
     categoryId : CategoryId__891294077;
     id : SubcategoryId__884790442;
     name : Text;
-    nameHi : Text
+    nameHindi : Text
   };
+type Timestamp__290823615 = Timestamp__301639476;
 type Timestamp__301639476 = Int;
 type Timestamp__384207765 = Timestamp__301639476;
 type Timestamp__813860109 = Timestamp__301639476;
+type UserId__158757552 = Principal;
+type UserId__41638867 = UserId__158757552;
+type UserProfile__104081004 = UserProfile__139963328;
+type UserProfile__139963328 =
+  {
+    address : Text;
+    createdAt : Timestamp__290823615;
+    displayName : Text;
+    email : Text;
+    phone : Text;
+    principal : Principal;
+    updatedAt : Timestamp__290823615
+  };
+type WishlistItem__430211439 =
+  {addedAt : Timestamp__290823615; productId : ProductId__181751412};
 actor {
   stable categories :
     {
       var blockIndex : Nat__490723111;
       var blocks : [var [var ?Category__404427711]];
+      var elementIndex : Nat__490723111
+    };
+  stable contactMessages :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?ContactMessage__674376541]];
       var elementIndex : Nat__490723111
     };
   stable orders :
@@ -98,13 +156,28 @@ actor {
       var blocks : [var [var ?Product__45918276]];
       var elementIndex : Nat__490723111
     };
+  stable profiles :
+    {
+      var root : Node__46230540<Principal, UserProfile__104081004>;
+      var size : Nat__490723111
+    };
+  stable reviewsMap :
+    {
+      var root :
+        Node__46230540<ProductId__181751412,
+                        List__415060402<Review__818063886>>;
+      var size : Nat__490723111
+    };
   stable var sampleDataLoaded : Bool;
+  stable var sampleDataVersion : Nat;
   stable state :
     {
       var adminPrincipal : ?Principal;
       var nextCategoryId : Nat;
+      var nextContactMessageId : Nat;
       var nextOrderId : Nat;
       var nextProductId : Nat;
+      var nextReviewId : Nat;
       var nextSubcategoryId : Nat
     };
   stable subcategories :
@@ -112,5 +185,11 @@ actor {
       var blockIndex : Nat__490723111;
       var blocks : [var [var ?Subcategory__145454756]];
       var elementIndex : Nat__490723111
+    };
+  stable wishlistMap :
+    {
+      var root :
+        Node__46230540<Principal, List__415060402<WishlistItem__430211439>>;
+      var size : Nat__490723111
     }
 };

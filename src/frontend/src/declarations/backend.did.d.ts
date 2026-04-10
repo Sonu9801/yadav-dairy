@@ -12,54 +12,62 @@ import type { Principal } from '@icp-sdk/core/principal';
 
 export interface Category {
   'id' : CategoryId,
-  'nameHi' : string,
+  'nameHindi' : string,
   'sortOrder' : bigint,
+  'icon' : string,
   'name' : string,
-  'description' : string,
-  'iconEmoji' : string,
+  'colorClass' : string,
 }
 export type CategoryId = bigint;
-export interface CreateCategoryArgs {
-  'nameHi' : string,
-  'sortOrder' : bigint,
+export interface ContactMessage {
+  'id' : ContactMessageId,
   'name' : string,
-  'description' : string,
-  'iconEmoji' : string,
+  'createdAt' : Timestamp,
+  'email' : string,
+  'message' : string,
+}
+export type ContactMessageId = bigint;
+export interface CreateCategoryArgs {
+  'nameHindi' : string,
+  'sortOrder' : bigint,
+  'icon' : string,
+  'name' : string,
+  'colorClass' : string,
 }
 export interface CreateProductArgs {
-  'categoryId' : CategoryId,
-  'nameEn' : string,
-  'nameHi' : string,
   'inStock' : boolean,
+  'nameHindi' : string,
   'packagingType' : string,
   'originalPrice' : bigint,
-  'fatContent' : string,
+  'subcategory' : string,
+  'name' : string,
   'description' : string,
-  'stockCount' : bigint,
+  'isFreshArrival' : boolean,
+  'stock' : bigint,
   'imageUrl' : string,
   'isFeatured' : boolean,
-  'subcategoryId' : SubcategoryId,
+  'quantity' : string,
+  'category' : string,
   'brand' : string,
   'price' : bigint,
+  'isBestSeller' : boolean,
   'isTrending' : boolean,
 }
 export interface CreateSubcategoryArgs {
   'categoryId' : CategoryId,
-  'nameHi' : string,
+  'nameHindi' : string,
   'name' : string,
 }
 export interface Order {
   'id' : OrderId,
-  'customerName' : string,
   'status' : OrderStatus,
   'paymentMethod' : PaymentMethod,
-  'customerPhone' : string,
-  'city' : string,
+  'deliveryFee' : bigint,
+  'userId' : UserId,
   'createdAt' : Timestamp,
   'totalAmount' : bigint,
-  'address' : string,
+  'shippingAddress' : string,
   'items' : Array<OrderItem>,
-  'pincode' : string,
 }
 export type OrderId = bigint;
 export interface OrderItem {
@@ -79,100 +87,148 @@ export type PaymentMethod = { 'upi' : null } |
   { 'card' : null } |
   { 'netBanking' : null };
 export interface PlaceOrderArgs {
-  'customerName' : string,
   'paymentMethod' : PaymentMethod,
-  'customerPhone' : string,
-  'city' : string,
+  'deliveryFee' : bigint,
   'totalAmount' : bigint,
-  'address' : string,
+  'shippingAddress' : string,
   'items' : Array<OrderItem>,
-  'pincode' : string,
 }
 export interface Product {
   'id' : ProductId,
-  'categoryId' : CategoryId,
-  'nameEn' : string,
-  'nameHi' : string,
   'inStock' : boolean,
+  'nameHindi' : string,
   'packagingType' : string,
   'originalPrice' : bigint,
+  'subcategory' : string,
+  'name' : string,
   'createdAt' : Timestamp,
-  'fatContent' : string,
   'description' : string,
-  'stockCount' : bigint,
+  'isFreshArrival' : boolean,
+  'stock' : bigint,
   'imageUrl' : string,
   'isFeatured' : boolean,
-  'subcategoryId' : SubcategoryId,
+  'quantity' : string,
+  'category' : string,
   'brand' : string,
   'rating' : number,
   'price' : bigint,
   'reviewCount' : bigint,
+  'isBestSeller' : boolean,
   'isTrending' : boolean,
 }
 export type ProductId = bigint;
+export interface Review {
+  'id' : ReviewId,
+  'createdAt' : Timestamp,
+  'productId' : ProductId,
+  'reviewerName' : string,
+  'comment' : string,
+  'reviewerPrincipal' : Principal,
+  'rating' : bigint,
+}
+export type ReviewId = bigint;
 export interface Subcategory {
   'id' : SubcategoryId,
   'categoryId' : CategoryId,
-  'nameHi' : string,
+  'nameHindi' : string,
   'name' : string,
 }
 export type SubcategoryId = bigint;
+export interface SubmitReviewArgs {
+  'productId' : ProductId,
+  'reviewerName' : string,
+  'comment' : string,
+  'rating' : bigint,
+}
 export type Timestamp = bigint;
 export interface UpdateCategoryArgs {
   'id' : CategoryId,
-  'nameHi' : string,
+  'nameHindi' : string,
   'sortOrder' : bigint,
+  'icon' : string,
   'name' : string,
-  'description' : string,
-  'iconEmoji' : string,
+  'colorClass' : string,
 }
 export interface UpdateProductArgs {
   'id' : ProductId,
-  'categoryId' : CategoryId,
-  'nameEn' : string,
-  'nameHi' : string,
   'inStock' : boolean,
+  'nameHindi' : string,
   'packagingType' : string,
   'originalPrice' : bigint,
-  'fatContent' : string,
+  'subcategory' : string,
+  'name' : string,
   'description' : string,
-  'stockCount' : bigint,
+  'isFreshArrival' : boolean,
+  'stock' : bigint,
   'imageUrl' : string,
   'isFeatured' : boolean,
-  'subcategoryId' : SubcategoryId,
+  'quantity' : string,
+  'category' : string,
   'brand' : string,
   'price' : bigint,
+  'isBestSeller' : boolean,
   'isTrending' : boolean,
 }
+export interface UpdateProfileArgs {
+  'displayName' : string,
+  'email' : string,
+  'address' : string,
+  'phone' : string,
+}
+export type UserId = Principal;
+export interface UserProfile {
+  'principal' : Principal,
+  'displayName' : string,
+  'createdAt' : Timestamp,
+  'email' : string,
+  'updatedAt' : Timestamp,
+  'address' : string,
+  'phone' : string,
+}
+export interface WishlistItem { 'productId' : ProductId, 'addedAt' : Timestamp }
 export interface _SERVICE {
+  'addContact' : ActorMethod<[string, string, string], ContactMessage>,
+  'addReview' : ActorMethod<[SubmitReviewArgs], Review>,
+  'addToWishlist' : ActorMethod<[ProductId], boolean>,
   'createCategory' : ActorMethod<[CreateCategoryArgs], Category>,
   'createProduct' : ActorMethod<[CreateProductArgs], Product>,
   'createSubcategory' : ActorMethod<[CreateSubcategoryArgs], Subcategory>,
   'deleteCategory' : ActorMethod<[CategoryId], boolean>,
   'deleteProduct' : ActorMethod<[ProductId], boolean>,
+  'deleteReview' : ActorMethod<[ReviewId, ProductId], boolean>,
   'deleteSubcategory' : ActorMethod<[SubcategoryId], boolean>,
+  'deleteUserProfile' : ActorMethod<[], boolean>,
   'filterProducts' : ActorMethod<
-    [[] | [CategoryId], [] | [bigint], [] | [string]],
+    [[] | [string], [] | [bigint], [] | [string]],
     Array<Product>
   >,
-  'getAdmin' : ActorMethod<[], [] | [Principal]>,
+  'getAdminPrincipal' : ActorMethod<[], [] | [Principal]>,
   'getCategory' : ActorMethod<[CategoryId], [] | [Category]>,
   'getOrder' : ActorMethod<[OrderId], [] | [Order]>,
   'getProduct' : ActorMethod<[ProductId], [] | [Product]>,
+  'getProductReviews' : ActorMethod<[ProductId], Array<Review>>,
+  'getUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getWishlist' : ActorMethod<[], Array<WishlistItem>>,
+  'listAllReviews' : ActorMethod<[], Array<Review>>,
+  'listBestSellers' : ActorMethod<[], Array<Product>>,
   'listCategories' : ActorMethod<[], Array<Category>>,
+  'listContacts' : ActorMethod<[], Array<ContactMessage>>,
   'listFeaturedProducts' : ActorMethod<[], Array<Product>>,
+  'listFreshArrivals' : ActorMethod<[], Array<Product>>,
   'listOrders' : ActorMethod<[], Array<Order>>,
   'listProducts' : ActorMethod<[], Array<Product>>,
-  'listProductsByCategory' : ActorMethod<[CategoryId], Array<Product>>,
+  'listProductsByCategory' : ActorMethod<[string], Array<Product>>,
   'listSubcategories' : ActorMethod<[], Array<Subcategory>>,
   'listSubcategoriesByCategory' : ActorMethod<[CategoryId], Array<Subcategory>>,
   'listTrendingProducts' : ActorMethod<[], Array<Product>>,
   'placeOrder' : ActorMethod<[PlaceOrderArgs], Order>,
+  'removeFromWishlist' : ActorMethod<[ProductId], boolean>,
   'searchProducts' : ActorMethod<[string], Array<Product>>,
-  'setAdmin' : ActorMethod<[], undefined>,
+  'setAdminPrincipal' : ActorMethod<[], undefined>,
   'updateCategory' : ActorMethod<[UpdateCategoryArgs], [] | [Category]>,
   'updateOrderStatus' : ActorMethod<[OrderId, OrderStatus], [] | [Order]>,
   'updateProduct' : ActorMethod<[UpdateProductArgs], [] | [Product]>,
+  'updateUserProfile' : ActorMethod<[UpdateProfileArgs], UserProfile>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

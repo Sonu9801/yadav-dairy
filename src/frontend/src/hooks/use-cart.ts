@@ -21,12 +21,13 @@ export const useCart = create<CartState>()(
         } else {
           const newItem: CartItem = {
             productId: product.id,
-            productName: product.nameEn,
-            productNameHi: product.nameHi,
+            name: product.name,
+            nameHindi: product.nameHindi,
             price: product.price,
             imageUrl: product.imageUrl,
             quantity: 1,
             packagingType: product.packagingType,
+            stock: product.stock,
           };
           set({ items: [...items, newItem] });
         }

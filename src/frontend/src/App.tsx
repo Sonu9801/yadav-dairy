@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-router";
 import { Suspense, lazy } from "react";
 import Layout from "./components/layout/Layout";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 const HomePage = lazy(() => import("./pages/Home"));
 const ProductsPage = lazy(() => import("./pages/Products"));
@@ -19,6 +21,9 @@ const AdminPage = lazy(() => import("./pages/Admin"));
 const AdminProductsPage = lazy(() => import("./pages/AdminProducts"));
 const AdminCategoriesPage = lazy(() => import("./pages/AdminCategories"));
 const AdminOrdersPage = lazy(() => import("./pages/AdminOrders"));
+const ProfilePage = lazy(() => import("./pages/Profile"));
+const WishlistPage = lazy(() => import("./pages/Wishlist"));
+const ContactPage = lazy(() => import("./pages/Contact"));
 
 const PageFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -30,12 +35,38 @@ const PageFallback = () => (
   </div>
 );
 
-const RootLayout = () => (
-  <Layout>
+function ProtectedOutlet() {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <div className="text-5xl">🔐</div>
+        <h2 className="text-xl font-display font-bold text-foreground">
+          Login Required
+        </h2>
+        <p className="text-muted-foreground max-w-xs">
+          Please login with Internet Identity to access this page.
+        </p>
+      </div>
+    );
+  }
+  return (
     <Suspense fallback={<PageFallback />}>
       <Outlet />
     </Suspense>
-  </Layout>
+  );
+}
+
+const RootLayout = () => (
+  <ThemeProvider>
+    <AuthProvider>
+      <Layout>
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
+      </Layout>
+    </AuthProvider>
+  </ThemeProvider>
 );
 
 const rootRoute = createRootRoute({ component: RootLayout });
@@ -62,13 +93,13 @@ const productDetailRoute = createRoute({
 });
 
 const cartRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => protectedRoute,
   path: "/cart",
   component: CartPage,
 });
 
 const checkoutRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => protectedRoute,
   path: "/checkout",
   component: CheckoutPage,
 });
@@ -103,17 +134,43 @@ const adminOrdersRoute = createRoute({
   component: AdminOrdersPage,
 });
 
+// Protected route parent
+const protectedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "protected",
+  component: ProtectedOutlet,
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: "/profile",
+  component: ProfilePage,
+});
+
+const wishlistRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/wishlist",
+  component: WishlistPage,
+});
+
+const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/contact",
+  component: ContactPage,
+});
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   productsRoute,
   productDetailRoute,
-  cartRoute,
-  checkoutRoute,
   orderConfirmationRoute,
   adminRoute,
   adminProductsRoute,
   adminCategoriesRoute,
   adminOrdersRoute,
+  protectedRoute.addChildren([cartRoute, checkoutRoute, profileRoute]),
+  wishlistRoute,
+  contactRoute,
 ]);
 
 const router = createRouter({ routeTree });

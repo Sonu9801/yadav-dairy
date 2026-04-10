@@ -49,8 +49,16 @@ mixin (
     CatalogLib.listTrendingProducts(products);
   };
 
-  public query func listProductsByCategory(categoryId : CatalogTypes.CategoryId) : async [CatalogTypes.Product] {
-    CatalogLib.listProductsByCategory(products, categoryId);
+  public query func listBestSellers() : async [CatalogTypes.Product] {
+    CatalogLib.listBestSellers(products);
+  };
+
+  public query func listFreshArrivals() : async [CatalogTypes.Product] {
+    CatalogLib.listFreshArrivals(products);
+  };
+
+  public query func listProductsByCategory(category : Text) : async [CatalogTypes.Product] {
+    CatalogLib.listProductsByCategory(products, category);
   };
 
   public query func searchProducts(term : Text) : async [CatalogTypes.Product] {
@@ -58,11 +66,11 @@ mixin (
   };
 
   public query func filterProducts(
-    categoryId : ?CatalogTypes.CategoryId,
+    category : ?Text,
     maxPrice : ?Nat,
     packagingType : ?Text,
   ) : async [CatalogTypes.Product] {
-    CatalogLib.filterProducts(products, categoryId, maxPrice, packagingType);
+    CatalogLib.filterProducts(products, category, maxPrice, packagingType);
   };
 
   // --- Admin-only catalog mutations ---

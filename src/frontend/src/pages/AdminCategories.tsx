@@ -83,9 +83,9 @@ export default function AdminCategories() {
     setEditingCat(cat);
     setCatForm({
       name: cat.name,
-      nameHi: cat.nameHi,
-      description: cat.description,
-      iconEmoji: cat.iconEmoji,
+      nameHi: cat.nameHindi,
+      description: "",
+      iconEmoji: cat.icon,
       sortOrder: cat.sortOrder.toString(),
     });
     setCatDialogOpen(true);
@@ -139,9 +139,9 @@ export default function AdminCategories() {
     e.preventDefault();
     const args = {
       name: catForm.name,
-      nameHi: catForm.nameHi,
-      description: catForm.description,
-      iconEmoji: catForm.iconEmoji,
+      nameHindi: catForm.nameHi,
+      icon: catForm.iconEmoji,
+      colorClass: "bg-blue-100",
       sortOrder: BigInt(catForm.sortOrder || 0),
     };
     if (editingCat) {
@@ -254,7 +254,7 @@ export default function AdminCategories() {
               >
                 <div className="px-5 py-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-2xl shrink-0">{cat.iconEmoji}</span>
+                    <span className="text-2xl shrink-0">{cat.icon}</span>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-foreground">
@@ -262,14 +262,9 @@ export default function AdminCategories() {
                         </p>
                         <span className="text-muted-foreground text-sm">·</span>
                         <p className="text-sm text-muted-foreground">
-                          {cat.nameHi}
+                          {cat.nameHindi}
                         </p>
                       </div>
-                      {cat.description && (
-                        <p className="text-xs text-muted-foreground truncate max-w-sm mt-0.5">
-                          {cat.description}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -326,7 +321,7 @@ export default function AdminCategories() {
                           <span className="text-foreground">{sub.name}</span>
                           <span className="text-muted-foreground">·</span>
                           <span className="text-muted-foreground">
-                            {sub.nameHi}
+                            {sub.nameHindi}
                           </span>
                           <button
                             type="button"
@@ -394,16 +389,6 @@ export default function AdminCategories() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="catDescription">Description</Label>
-              <Input
-                id="catDescription"
-                data-ocid="category-description"
-                value={catForm.description}
-                onChange={(e) => setCatField("description", e.target.value)}
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="catIcon">Icon Emoji</Label>
@@ -459,7 +444,7 @@ export default function AdminCategories() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              Add Subcategory to {subParent?.iconEmoji} {subParent?.name}
+              Add Subcategory to {subParent?.icon} {subParent?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
@@ -500,7 +485,7 @@ export default function AdminCategories() {
                   createSubMutation.mutate({
                     categoryId: subParent.id,
                     name: subName,
-                    nameHi: subNameHi,
+                    nameHindi: subNameHi,
                   });
                 }}
               >

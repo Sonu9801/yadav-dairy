@@ -1,72 +1,114 @@
+type WishlistItem = 
+ record {
+   addedAt: Timestamp;
+   productId: ProductId;
+ };
+type UserProfile = 
+ record {
+   address: text;
+   createdAt: Timestamp;
+   displayName: text;
+   email: text;
+   phone: text;
+   "principal": principal;
+   updatedAt: Timestamp;
+ };
+type UserId = principal;
+type UpdateProfileArgs = 
+ record {
+   address: text;
+   displayName: text;
+   email: text;
+   phone: text;
+ };
 type UpdateProductArgs = 
  record {
    brand: text;
-   categoryId: CategoryId;
+   category: text;
    description: text;
-   fatContent: text;
    id: ProductId;
    imageUrl: text;
    inStock: bool;
+   isBestSeller: bool;
    isFeatured: bool;
+   isFreshArrival: bool;
    isTrending: bool;
-   nameEn: text;
-   nameHi: text;
+   name: text;
+   nameHindi: text;
    originalPrice: nat;
    packagingType: text;
    price: nat;
-   stockCount: nat;
-   subcategoryId: SubcategoryId;
+   quantity: text;
+   stock: nat;
+   subcategory: text;
  };
 type UpdateCategoryArgs = 
  record {
-   description: text;
-   iconEmoji: text;
+   colorClass: text;
+   icon: text;
    id: CategoryId;
    name: text;
-   nameHi: text;
+   nameHindi: text;
    sortOrder: nat;
  };
 type Timestamp = int;
+type SubmitReviewArgs = 
+ record {
+   comment: text;
+   productId: ProductId;
+   rating: nat;
+   reviewerName: text;
+ };
 type SubcategoryId = nat;
 type Subcategory = 
  record {
    categoryId: CategoryId;
    id: SubcategoryId;
    name: text;
-   nameHi: text;
+   nameHindi: text;
+ };
+type ReviewId = nat;
+type Review = 
+ record {
+   comment: text;
+   createdAt: Timestamp;
+   id: ReviewId;
+   productId: ProductId;
+   rating: nat;
+   reviewerName: text;
+   reviewerPrincipal: principal;
  };
 type ProductId = nat;
 type Product = 
  record {
    brand: text;
-   categoryId: CategoryId;
+   category: text;
    createdAt: Timestamp;
    description: text;
-   fatContent: text;
    id: ProductId;
    imageUrl: text;
    inStock: bool;
+   isBestSeller: bool;
    isFeatured: bool;
+   isFreshArrival: bool;
    isTrending: bool;
-   nameEn: text;
-   nameHi: text;
+   name: text;
+   nameHindi: text;
    originalPrice: nat;
    packagingType: text;
    price: nat;
+   quantity: text;
    rating: float64;
    reviewCount: nat;
-   stockCount: nat;
-   subcategoryId: SubcategoryId;
+   stock: nat;
+   subcategory: text;
  };
 type PlaceOrderArgs = 
  record {
-   address: text;
-   city: text;
-   customerName: text;
-   customerPhone: text;
+   deliveryFee: nat;
    items: vec OrderItem;
    paymentMethod: PaymentMethod;
-   pincode: text;
+   shippingAddress: text;
    totalAmount: nat;
  };
 type PaymentMethod = 
@@ -95,86 +137,109 @@ type OrderItem =
 type OrderId = nat;
 type Order = 
  record {
-   address: text;
-   city: text;
    createdAt: Timestamp;
-   customerName: text;
-   customerPhone: text;
+   deliveryFee: nat;
    id: OrderId;
    items: vec OrderItem;
    paymentMethod: PaymentMethod;
-   pincode: text;
+   shippingAddress: text;
    status: OrderStatus;
    totalAmount: nat;
+   userId: UserId;
  };
 type CreateSubcategoryArgs = 
  record {
    categoryId: CategoryId;
    name: text;
-   nameHi: text;
+   nameHindi: text;
  };
 type CreateProductArgs = 
  record {
    brand: text;
-   categoryId: CategoryId;
+   category: text;
    description: text;
-   fatContent: text;
    imageUrl: text;
    inStock: bool;
+   isBestSeller: bool;
    isFeatured: bool;
+   isFreshArrival: bool;
    isTrending: bool;
-   nameEn: text;
-   nameHi: text;
+   name: text;
+   nameHindi: text;
    originalPrice: nat;
    packagingType: text;
    price: nat;
-   stockCount: nat;
-   subcategoryId: SubcategoryId;
+   quantity: text;
+   stock: nat;
+   subcategory: text;
  };
 type CreateCategoryArgs = 
  record {
-   description: text;
-   iconEmoji: text;
+   colorClass: text;
+   icon: text;
    name: text;
-   nameHi: text;
+   nameHindi: text;
    sortOrder: nat;
+ };
+type ContactMessageId = nat;
+type ContactMessage = 
+ record {
+   createdAt: Timestamp;
+   email: text;
+   id: ContactMessageId;
+   message: text;
+   name: text;
  };
 type CategoryId = nat;
 type Category = 
  record {
-   description: text;
-   iconEmoji: text;
+   colorClass: text;
+   icon: text;
    id: CategoryId;
    name: text;
-   nameHi: text;
+   nameHindi: text;
    sortOrder: nat;
  };
 service : {
+  addContact: (name: text, email: text, message: text) -> (ContactMessage);
+  addReview: (args: SubmitReviewArgs) -> (Review);
+  addToWishlist: (productId: ProductId) -> (bool);
   createCategory: (args: CreateCategoryArgs) -> (Category);
   createProduct: (args: CreateProductArgs) -> (Product);
   createSubcategory: (args: CreateSubcategoryArgs) -> (Subcategory);
   deleteCategory: (id: CategoryId) -> (bool);
   deleteProduct: (id: ProductId) -> (bool);
+  deleteReview: (reviewId: ReviewId, productId: ProductId) -> (bool);
   deleteSubcategory: (id: SubcategoryId) -> (bool);
-  filterProducts: (categoryId: opt CategoryId, maxPrice: opt nat,
-   packagingType: opt text) -> (vec Product) query;
-  getAdmin: () -> (opt principal) query;
+  deleteUserProfile: () -> (bool);
+  filterProducts: (category: opt text, maxPrice: opt nat, packagingType:
+   opt text) -> (vec Product) query;
+  getAdminPrincipal: () -> (opt principal) query;
   getCategory: (id: CategoryId) -> (opt Category) query;
   getOrder: (id: OrderId) -> (opt Order) query;
   getProduct: (id: ProductId) -> (opt Product) query;
+  getProductReviews: (productId: ProductId) -> (vec Review) query;
+  getUserProfile: () -> (opt UserProfile) query;
+  getWishlist: () -> (vec WishlistItem) query;
+  listAllReviews: () -> (vec Review) query;
+  listBestSellers: () -> (vec Product) query;
   listCategories: () -> (vec Category) query;
+  listContacts: () -> (vec ContactMessage) query;
   listFeaturedProducts: () -> (vec Product) query;
-  listOrders: () -> (vec Order);
+  listFreshArrivals: () -> (vec Product) query;
+  listOrders: () -> (vec Order) query;
   listProducts: () -> (vec Product) query;
-  listProductsByCategory: (categoryId: CategoryId) -> (vec Product) query;
+  listProductsByCategory: (category: text) -> (vec Product) query;
   listSubcategories: () -> (vec Subcategory) query;
   listSubcategoriesByCategory: (categoryId: CategoryId) ->
    (vec Subcategory) query;
   listTrendingProducts: () -> (vec Product) query;
   placeOrder: (args: PlaceOrderArgs) -> (Order);
+  removeFromWishlist: (productId: ProductId) -> (bool);
   searchProducts: (term: text) -> (vec Product) query;
-  setAdmin: () -> ();
+  setAdminPrincipal: () -> ();
   updateCategory: (args: UpdateCategoryArgs) -> (opt Category);
   updateOrderStatus: (id: OrderId, status: OrderStatus) -> (opt Order);
   updateProduct: (args: UpdateProductArgs) -> (opt Product);
+  updateUserProfile: (args: UpdateProfileArgs) -> (UserProfile);
 }

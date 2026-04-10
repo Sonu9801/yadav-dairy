@@ -5,18 +5,16 @@ import Types "../types/orders";
 module {
   public type Order = Types.Order;
 
-  public func placeOrder(orders : List.List<Order>, nextId : Nat, args : Types.PlaceOrderArgs) : Order {
+  public func placeOrder(orders : List.List<Order>, nextId : Nat, caller : Principal, args : Types.PlaceOrderArgs) : Order {
     let order : Order = {
       id = nextId;
-      customerName = args.customerName;
-      customerPhone = args.customerPhone;
-      address = args.address;
-      city = args.city;
-      pincode = args.pincode;
-      paymentMethod = args.paymentMethod;
+      userId = caller;
       items = args.items;
       totalAmount = args.totalAmount;
+      deliveryFee = args.deliveryFee;
       status = #pending;
+      paymentMethod = args.paymentMethod;
+      shippingAddress = args.shippingAddress;
       createdAt = Time.now();
     };
     orders.add(order);
@@ -31,15 +29,19 @@ module {
     orders.toArray();
   };
 
+  public func listOrdersByUser(orders : List.List<Order>, userId : Principal) : [Order] {
+    orders.filter(func(o) { o.userId == userId }).toArray();
+  };
+
   public func updateOrderStatus(orders : List.List<Order>, id : Types.OrderId, status : Types.OrderStatus) : ?Order {
-    var updated : ?Order = null;
-    orders.mapInPlace(func(o) {
-      if (o.id == id) {
-        let u : Order = { o with status };
-        updated := ?u;
-        u;
-      } else { o };
-    });
-    updated;
+    switch (orders.findIndex(func(o) { o.id == id })) {
+      case null null;
+      case (?i) {
+        let existing = orders.at(i);
+        let updated : Order = { existing with status };
+        orders.put(i, updated);
+        ?updated;
+      };
+    };
   };
 };

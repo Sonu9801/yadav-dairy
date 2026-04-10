@@ -1,6 +1,6 @@
 import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Edit2, ImageOff, Package, Plus, Search, Trash2 } from "lucide-react";
+import { Edit2, Package, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createActor } from "../backend";
@@ -10,6 +10,7 @@ import type {
   UpdateProductArgs,
 } from "../backend.d";
 import AdminLayout from "../components/admin/AdminLayout";
+import ProductPackageSVG from "../components/products/ProductPackageSVG";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,46 +51,36 @@ const PACKAGING_TYPES = [
   "Box",
 ];
 
-const FAT_CONTENT_OPTIONS = [
-  "Full Fat",
-  "Toned",
-  "Double Toned",
-  "Skimmed",
-  "Low Fat",
-  "Fat Free",
-  "N/A",
-];
-
 interface ProductFormData {
-  nameEn: string;
-  nameHi: string;
+  name: string;
+  nameHindi: string;
   description: string;
   price: string;
   originalPrice: string;
-  categoryId: string;
-  subcategoryId: string;
+  category: string;
+  subcategory: string;
   packagingType: string;
-  fatContent: string;
+  quantity: string;
   imageUrl: string;
   inStock: boolean;
-  stockCount: string;
+  stock: string;
   isFeatured: boolean;
   isTrending: boolean;
 }
 
 const defaultForm: ProductFormData = {
-  nameEn: "",
-  nameHi: "",
+  name: "",
+  nameHindi: "",
   description: "",
   price: "",
   originalPrice: "",
-  categoryId: "",
-  subcategoryId: "",
+  category: "",
+  subcategory: "",
   packagingType: "Pouch",
-  fatContent: "N/A",
-  imageUrl: "",
+  quantity: "500ml",
+  imageUrl: "milk_pouch",
   inStock: true,
-  stockCount: "100",
+  stock: "100",
   isFeatured: false,
   isTrending: false,
 };
@@ -107,21 +98,18 @@ export default function AdminProducts() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductFormData>(defaultForm);
 
-  const filteredSubcategories = useMemo(
-    () =>
-      subcategories?.filter(
-        (s) => s.categoryId.toString() === form.categoryId,
-      ) ?? [],
-    [subcategories, form.categoryId],
-  );
+  const filteredSubcategories = useMemo(() => {
+    const cat = categories?.find((c) => c.name === form.category);
+    return subcategories?.filter((s) => s.categoryId === cat?.id) ?? [];
+  }, [subcategories, categories, form.category]);
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     const term = search.toLowerCase();
     return products.filter(
       (p) =>
-        p.nameEn.toLowerCase().includes(term) ||
-        p.nameHi.toLowerCase().includes(term),
+        p.name.toLowerCase().includes(term) ||
+        p.nameHindi.toLowerCase().includes(term),
     );
   }, [products, search]);
 
@@ -139,18 +127,18 @@ export default function AdminProducts() {
   function openEdit(product: Product) {
     setEditingProduct(product);
     setForm({
-      nameEn: product.nameEn,
-      nameHi: product.nameHi,
+      name: product.name,
+      nameHindi: product.nameHindi,
       description: product.description,
       price: product.price.toString(),
       originalPrice: product.originalPrice.toString(),
-      categoryId: product.categoryId.toString(),
-      subcategoryId: product.subcategoryId.toString(),
+      category: product.category,
+      subcategory: product.subcategory,
       packagingType: product.packagingType,
-      fatContent: product.fatContent,
+      quantity: product.quantity,
       imageUrl: product.imageUrl,
       inStock: product.inStock,
-      stockCount: product.stockCount.toString(),
+      stock: product.stock.toString(),
       isFeatured: product.isFeatured,
       isTrending: product.isTrending,
     });
@@ -199,20 +187,22 @@ export default function AdminProducts() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const args = {
-      nameEn: form.nameEn,
-      nameHi: form.nameHi,
+      name: form.name,
+      nameHindi: form.nameHindi,
       description: form.description,
       price: BigInt(form.price || 0),
       originalPrice: BigInt(form.originalPrice || 0),
-      categoryId: BigInt(form.categoryId || 0),
-      subcategoryId: BigInt(form.subcategoryId || 0),
+      category: form.category,
+      subcategory: form.subcategory,
       packagingType: form.packagingType,
-      fatContent: form.fatContent,
+      quantity: form.quantity,
       imageUrl: form.imageUrl,
       inStock: form.inStock,
-      stockCount: BigInt(form.stockCount || 0),
+      stock: BigInt(form.stock || 0),
       isFeatured: form.isFeatured,
       isTrending: form.isTrending,
+      isBestSeller: false,
+      isFreshArrival: false,
       brand: "Yadav Dairy",
     };
     if (editingProduct) {
@@ -298,7 +288,7 @@ export default function AdminProducts() {
               <tbody className="divide-y divide-border">
                 {filteredProducts.map((product) => {
                   const cat = categories?.find(
-                    (c) => c.id === product.categoryId,
+                    (c) => c.name === product.category,
                   );
                   return (
                     <tr
@@ -308,29 +298,19 @@ export default function AdminProducts() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-muted shrink-0 overflow-hidden">
-                            {product.imageUrl ? (
-                              <img
-                                src={product.imageUrl}
-                                alt={product.nameEn}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display =
-                                    "none";
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <ImageOff className="w-4 h-4 text-muted-foreground" />
-                              </div>
-                            )}
+                          <div className="w-10 h-10 rounded-lg bg-muted shrink-0 overflow-hidden flex items-center justify-center">
+                            <ProductPackageSVG
+                              packagingKey={product.imageUrl}
+                              productName={product.name}
+                              size="sm"
+                            />
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-foreground truncate max-w-[140px]">
-                              {product.nameEn}
+                              {product.name}
                             </p>
                             <p className="text-xs text-muted-foreground truncate max-w-[140px]">
-                              {product.nameHi}
+                              {product.nameHindi}
                             </p>
                           </div>
                         </div>
@@ -417,8 +397,8 @@ export default function AdminProducts() {
                 <Input
                   id="nameEn"
                   data-ocid="product-name-en"
-                  value={form.nameEn}
-                  onChange={(e) => setField("nameEn", e.target.value)}
+                  value={form.name}
+                  onChange={(e) => setField("name", e.target.value)}
                   required
                 />
               </div>
@@ -427,8 +407,8 @@ export default function AdminProducts() {
                 <Input
                   id="nameHi"
                   data-ocid="product-name-hi"
-                  value={form.nameHi}
-                  onChange={(e) => setField("nameHi", e.target.value)}
+                  value={form.nameHindi}
+                  onChange={(e) => setField("nameHindi", e.target.value)}
                   required
                 />
               </div>
@@ -478,18 +458,18 @@ export default function AdminProducts() {
                 <select
                   id="categoryId"
                   data-ocid="product-category"
-                  value={form.categoryId}
+                  value={form.category}
                   onChange={(e) => {
-                    setField("categoryId", e.target.value);
-                    setField("subcategoryId", "");
+                    setField("category", e.target.value);
+                    setField("subcategory", "");
                   }}
                   required
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Select category</option>
                   {categories?.map((c) => (
-                    <option key={c.id.toString()} value={c.id.toString()}>
-                      {c.iconEmoji} {c.name}
+                    <option key={c.id.toString()} value={c.name}>
+                      {c.icon} {c.name}
                     </option>
                   ))}
                 </select>
@@ -499,14 +479,14 @@ export default function AdminProducts() {
                 <select
                   id="subcategoryId"
                   data-ocid="product-subcategory"
-                  value={form.subcategoryId}
-                  onChange={(e) => setField("subcategoryId", e.target.value)}
-                  disabled={!form.categoryId}
+                  value={form.subcategory}
+                  onChange={(e) => setField("subcategory", e.target.value)}
+                  disabled={!form.category}
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                 >
                   <option value="">Select subcategory</option>
                   {filteredSubcategories.map((s) => (
-                    <option key={s.id.toString()} value={s.id.toString()}>
+                    <option key={s.id.toString()} value={s.name}>
                       {s.name}
                     </option>
                   ))}
@@ -532,32 +512,25 @@ export default function AdminProducts() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="fatContent">Fat Content</Label>
-                <select
-                  id="fatContent"
-                  data-ocid="product-fat-content"
-                  value={form.fatContent}
-                  onChange={(e) => setField("fatContent", e.target.value)}
-                  className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  {FAT_CONTENT_OPTIONS.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </select>
+                <Label htmlFor="quantity">Quantity / Size</Label>
+                <Input
+                  id="quantity"
+                  data-ocid="product-quantity"
+                  value={form.quantity}
+                  onChange={(e) => setField("quantity", e.target.value)}
+                  placeholder="e.g. 500ml, 200g"
+                />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="imageUrl">Image URL</Label>
+              <Label htmlFor="imageUrl">Packaging Key (imageUrl)</Label>
               <Input
                 id="imageUrl"
                 data-ocid="product-image-url"
-                type="url"
                 value={form.imageUrl}
                 onChange={(e) => setField("imageUrl", e.target.value)}
-                placeholder="https://..."
+                placeholder="e.g. milk_pouch, ghee_jar, paneer_block"
               />
             </div>
 
@@ -568,8 +541,8 @@ export default function AdminProducts() {
                 data-ocid="product-stock-count"
                 type="number"
                 min="0"
-                value={form.stockCount}
-                onChange={(e) => setField("stockCount", e.target.value)}
+                value={form.stock}
+                onChange={(e) => setField("stock", e.target.value)}
               />
             </div>
 
@@ -630,9 +603,8 @@ export default function AdminProducts() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Product?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete{" "}
-              <strong>{deleteTarget?.nameEn}</strong>. This action cannot be
-              undone.
+              This will permanently delete <strong>{deleteTarget?.name}</strong>
+              . This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

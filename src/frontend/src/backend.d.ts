@@ -9,41 +9,67 @@ export interface None {
 export type Option<T> = Some<T> | None;
 export interface Product {
     id: ProductId;
-    categoryId: CategoryId;
-    nameEn: string;
-    nameHi: string;
     inStock: boolean;
+    nameHindi: string;
     packagingType: string;
     originalPrice: bigint;
+    subcategory: string;
+    name: string;
     createdAt: Timestamp;
-    fatContent: string;
     description: string;
-    stockCount: bigint;
+    isFreshArrival: boolean;
+    stock: bigint;
     imageUrl: string;
     isFeatured: boolean;
-    subcategoryId: SubcategoryId;
+    quantity: string;
+    category: string;
     brand: string;
     rating: number;
     price: bigint;
     reviewCount: bigint;
+    isBestSeller: boolean;
     isTrending: boolean;
 }
-export type SubcategoryId = bigint;
-export type Timestamp = bigint;
-export interface CreateCategoryArgs {
-    nameHi: string;
-    sortOrder: bigint;
-    name: string;
-    description: string;
-    iconEmoji: string;
+export interface UserProfile {
+    principal: Principal;
+    displayName: string;
+    createdAt: Timestamp;
+    email: string;
+    updatedAt: Timestamp;
+    address: string;
+    phone: string;
 }
-export interface Category {
-    id: CategoryId;
-    nameHi: string;
-    sortOrder: bigint;
+export type Timestamp = bigint;
+export interface PlaceOrderArgs {
+    paymentMethod: PaymentMethod;
+    deliveryFee: bigint;
+    totalAmount: bigint;
+    shippingAddress: string;
+    items: Array<OrderItem>;
+}
+export type OrderId = bigint;
+export interface CreateProductArgs {
+    inStock: boolean;
+    nameHindi: string;
+    packagingType: string;
+    originalPrice: bigint;
+    subcategory: string;
     name: string;
     description: string;
-    iconEmoji: string;
+    isFreshArrival: boolean;
+    stock: bigint;
+    imageUrl: string;
+    isFeatured: boolean;
+    quantity: string;
+    category: string;
+    brand: string;
+    price: bigint;
+    isBestSeller: boolean;
+    isTrending: boolean;
+}
+export interface WishlistItem {
+    productId: ProductId;
+    addedAt: Timestamp;
 }
 export interface OrderItem {
     productId: ProductId;
@@ -51,86 +77,105 @@ export interface OrderItem {
     quantity: bigint;
     price: bigint;
 }
+export interface CreateCategoryArgs {
+    nameHindi: string;
+    sortOrder: bigint;
+    icon: string;
+    name: string;
+    colorClass: string;
+}
+export type ContactMessageId = bigint;
+export interface Category {
+    id: CategoryId;
+    nameHindi: string;
+    sortOrder: bigint;
+    icon: string;
+    name: string;
+    colorClass: string;
+}
 export interface Order {
     id: OrderId;
-    customerName: string;
     status: OrderStatus;
     paymentMethod: PaymentMethod;
-    customerPhone: string;
-    city: string;
+    deliveryFee: bigint;
+    userId: UserId;
     createdAt: Timestamp;
     totalAmount: bigint;
-    address: string;
+    shippingAddress: string;
     items: Array<OrderItem>;
-    pincode: string;
+}
+export interface UpdateProfileArgs {
+    displayName: string;
+    email: string;
+    address: string;
+    phone: string;
 }
 export interface UpdateProductArgs {
     id: ProductId;
-    categoryId: CategoryId;
-    nameEn: string;
-    nameHi: string;
     inStock: boolean;
+    nameHindi: string;
     packagingType: string;
     originalPrice: bigint;
-    fatContent: string;
+    subcategory: string;
+    name: string;
     description: string;
-    stockCount: bigint;
+    isFreshArrival: boolean;
+    stock: bigint;
     imageUrl: string;
     isFeatured: boolean;
-    subcategoryId: SubcategoryId;
+    quantity: string;
+    category: string;
     brand: string;
     price: bigint;
+    isBestSeller: boolean;
     isTrending: boolean;
+}
+export type UserId = Principal;
+export interface ContactMessage {
+    id: ContactMessageId;
+    name: string;
+    createdAt: Timestamp;
+    email: string;
+    message: string;
 }
 export interface CreateSubcategoryArgs {
     categoryId: CategoryId;
-    nameHi: string;
+    nameHindi: string;
     name: string;
 }
 export interface Subcategory {
     id: SubcategoryId;
     categoryId: CategoryId;
-    nameHi: string;
+    nameHindi: string;
     name: string;
 }
 export type CategoryId = bigint;
-export type ProductId = bigint;
+export type ReviewId = bigint;
 export interface UpdateCategoryArgs {
     id: CategoryId;
-    nameHi: string;
+    nameHindi: string;
     sortOrder: bigint;
+    icon: string;
     name: string;
-    description: string;
-    iconEmoji: string;
+    colorClass: string;
 }
-export interface CreateProductArgs {
-    categoryId: CategoryId;
-    nameEn: string;
-    nameHi: string;
-    inStock: boolean;
-    packagingType: string;
-    originalPrice: bigint;
-    fatContent: string;
-    description: string;
-    stockCount: bigint;
-    imageUrl: string;
-    isFeatured: boolean;
-    subcategoryId: SubcategoryId;
-    brand: string;
-    price: bigint;
-    isTrending: boolean;
+export type ProductId = bigint;
+export interface SubmitReviewArgs {
+    productId: ProductId;
+    reviewerName: string;
+    comment: string;
+    rating: bigint;
 }
-export interface PlaceOrderArgs {
-    customerName: string;
-    paymentMethod: PaymentMethod;
-    customerPhone: string;
-    city: string;
-    totalAmount: bigint;
-    address: string;
-    items: Array<OrderItem>;
-    pincode: string;
+export interface Review {
+    id: ReviewId;
+    createdAt: Timestamp;
+    productId: ProductId;
+    reviewerName: string;
+    comment: string;
+    reviewerPrincipal: Principal;
+    rating: bigint;
 }
-export type OrderId = bigint;
+export type SubcategoryId = bigint;
 export enum OrderStatus {
     shipped = "shipped",
     cancelled = "cancelled",
@@ -146,29 +191,43 @@ export enum PaymentMethod {
     netBanking = "netBanking"
 }
 export interface backendInterface {
+    addContact(name: string, email: string, message: string): Promise<ContactMessage>;
+    addReview(args: SubmitReviewArgs): Promise<Review>;
+    addToWishlist(productId: ProductId): Promise<boolean>;
     createCategory(args: CreateCategoryArgs): Promise<Category>;
     createProduct(args: CreateProductArgs): Promise<Product>;
     createSubcategory(args: CreateSubcategoryArgs): Promise<Subcategory>;
     deleteCategory(id: CategoryId): Promise<boolean>;
     deleteProduct(id: ProductId): Promise<boolean>;
+    deleteReview(reviewId: ReviewId, productId: ProductId): Promise<boolean>;
     deleteSubcategory(id: SubcategoryId): Promise<boolean>;
-    filterProducts(categoryId: CategoryId | null, maxPrice: bigint | null, packagingType: string | null): Promise<Array<Product>>;
-    getAdmin(): Promise<Principal | null>;
+    deleteUserProfile(): Promise<boolean>;
+    filterProducts(category: string | null, maxPrice: bigint | null, packagingType: string | null): Promise<Array<Product>>;
+    getAdminPrincipal(): Promise<Principal | null>;
     getCategory(id: CategoryId): Promise<Category | null>;
     getOrder(id: OrderId): Promise<Order | null>;
     getProduct(id: ProductId): Promise<Product | null>;
+    getProductReviews(productId: ProductId): Promise<Array<Review>>;
+    getUserProfile(): Promise<UserProfile | null>;
+    getWishlist(): Promise<Array<WishlistItem>>;
+    listAllReviews(): Promise<Array<Review>>;
+    listBestSellers(): Promise<Array<Product>>;
     listCategories(): Promise<Array<Category>>;
+    listContacts(): Promise<Array<ContactMessage>>;
     listFeaturedProducts(): Promise<Array<Product>>;
+    listFreshArrivals(): Promise<Array<Product>>;
     listOrders(): Promise<Array<Order>>;
     listProducts(): Promise<Array<Product>>;
-    listProductsByCategory(categoryId: CategoryId): Promise<Array<Product>>;
+    listProductsByCategory(category: string): Promise<Array<Product>>;
     listSubcategories(): Promise<Array<Subcategory>>;
     listSubcategoriesByCategory(categoryId: CategoryId): Promise<Array<Subcategory>>;
     listTrendingProducts(): Promise<Array<Product>>;
     placeOrder(args: PlaceOrderArgs): Promise<Order>;
+    removeFromWishlist(productId: ProductId): Promise<boolean>;
     searchProducts(term: string): Promise<Array<Product>>;
-    setAdmin(): Promise<void>;
+    setAdminPrincipal(): Promise<void>;
     updateCategory(args: UpdateCategoryArgs): Promise<Category | null>;
     updateOrderStatus(id: OrderId, status: OrderStatus): Promise<Order | null>;
     updateProduct(args: UpdateProductArgs): Promise<Product | null>;
+    updateUserProfile(args: UpdateProfileArgs): Promise<UserProfile>;
 }

@@ -4,7 +4,9 @@ import { Separator } from "@/components/ui/separator";
 import { Link, useParams } from "@tanstack/react-router";
 import {
   ArrowRight,
+  CalendarDays,
   CheckCircle2,
+  ClipboardList,
   CreditCard,
   Loader2,
   MapPin,
@@ -17,11 +19,28 @@ import { useCart } from "../hooks/use-cart";
 import { formatPrice } from "../lib/utils";
 
 const paymentLabel: Record<string, string> = {
-  cashOnDelivery: "Cash on Delivery",
-  upi: "UPI",
-  card: "Credit / Debit Card",
-  netBanking: "Net Banking",
+  cashOnDelivery: "💵 Cash on Delivery",
+  upi: "📱 UPI",
+  card: "💳 Credit / Debit Card",
+  netBanking: "🏦 Net Banking",
 };
+
+function getEstimatedDelivery(): string {
+  const today = new Date();
+  // Add 3–5 business days, skipping weekends
+  let added = 0;
+  const d = new Date(today);
+  while (added < 4) {
+    d.setDate(d.getDate() + 1);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) added++;
+  }
+  return d.toLocaleDateString("en-IN", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
 
 export default function OrderConfirmation() {
   const params = useParams({ from: "/order-confirmation/$id" });
@@ -29,6 +48,7 @@ export default function OrderConfirmation() {
   const { data: order, isLoading } = useOrder(orderId);
   const { clearCart } = useCart();
   const cleared = useRef(false);
+  const estimatedDate = getEstimatedDelivery();
 
   useEffect(() => {
     if (!cleared.current) {
@@ -40,7 +60,10 @@ export default function OrderConfirmation() {
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="text-center space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading your order...</p>
+        </div>
       </div>
     );
   }
@@ -59,10 +82,19 @@ export default function OrderConfirmation() {
   const paymentMethod = Object.keys(order.paymentMethod)[0] ?? "cashOnDelivery";
   const paymentDisplay = paymentLabel[paymentMethod] ?? paymentMethod;
 
+  // Calculate subtotal from items
+  const subtotal = order.items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    BigInt(0),
+  );
+
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-background"
+      data-ocid="order-confirmation-page"
+    >
       <div className="max-w-lg mx-auto px-4 py-10">
-        {/* Success Header */}
+        {/* Animated Success Header */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -70,25 +102,48 @@ export default function OrderConfirmation() {
           className="text-center mb-8"
           data-ocid="order-success-header"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{
-              delay: 0.1,
-              type: "spring",
-              stiffness: 300,
-              damping: 18,
-            }}
-            className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4"
-          >
-            <CheckCircle2 className="w-10 h-10 text-primary" strokeWidth={2} />
-          </motion.div>
+          {/* Pulsing ring animation */}
+          <div className="relative w-24 h-24 mx-auto mb-5">
+            <motion.div
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1.4, opacity: 0 }}
+              transition={{
+                duration: 1.2,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeOut",
+                delay: 0.3,
+              }}
+              className="absolute inset-0 rounded-full bg-primary/20"
+            />
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{
+                delay: 0.1,
+                type: "spring",
+                stiffness: 300,
+                damping: 18,
+              }}
+              className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center"
+            >
+              <motion.div
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+              >
+                <CheckCircle2
+                  className="w-12 h-12 text-primary"
+                  strokeWidth={2}
+                />
+              </motion.div>
+            </motion.div>
+          </div>
 
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="font-display text-2xl font-bold text-foreground mb-1"
+            className="font-display text-3xl font-bold text-foreground mb-1"
           >
             Order Placed! 🎉
           </motion.h1>
@@ -98,7 +153,7 @@ export default function OrderConfirmation() {
             transition={{ delay: 0.35 }}
             className="text-muted-foreground text-sm"
           >
-            Thank you! Your fresh dairy products are on their way.
+            Thank you! Your fresh Yadav Dairy products are on their way.
           </motion.p>
 
           <motion.div
@@ -113,9 +168,31 @@ export default function OrderConfirmation() {
               className="font-mono text-xs"
               data-ocid="order-id-badge"
             >
-              #{order.id.toString()}
+              #YD-{order.id.toString().padStart(6, "0")}
             </Badge>
           </motion.div>
+        </motion.div>
+
+        {/* Estimated Delivery */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="bg-accent/8 border border-accent/20 rounded-2xl p-4 flex items-center gap-3 mb-4"
+          data-ocid="order-delivery-estimate"
+        >
+          <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
+            <CalendarDays className="w-5 h-5 text-accent" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">
+              Estimated Delivery
+            </p>
+            <p className="text-sm font-bold text-foreground">{estimatedDate}</p>
+          </div>
+          <Badge className="ml-auto bg-primary/10 text-primary hover:bg-primary/10 border-0 text-xs">
+            3–5 Days
+          </Badge>
         </motion.div>
 
         {/* Order Items */}
@@ -139,11 +216,11 @@ export default function OrderConfirmation() {
                 key={`${item.productId?.toString() ?? i}-${item.productName}`}
                 className="flex items-center justify-between text-sm"
               >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold flex-shrink-0">
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold flex-shrink-0">
                     {Number(item.quantity)}
                   </span>
-                  <span className="truncate text-foreground">
+                  <span className="truncate text-foreground font-medium">
                     {item.productName}
                   </span>
                 </div>
@@ -159,8 +236,21 @@ export default function OrderConfirmation() {
           <div className="space-y-1.5 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
-              <span>{formatPrice(order.totalAmount)}</span>
+              <span>{formatPrice(subtotal)}</span>
             </div>
+            {order.totalAmount > subtotal && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Delivery</span>
+                <span>{formatPrice(order.totalAmount - subtotal)}</span>
+              </div>
+            )}
+            {order.totalAmount <= subtotal && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Delivery</span>
+                <span className="text-primary font-medium">FREE</span>
+              </div>
+            )}
+            <Separator />
             <div className="flex justify-between font-bold text-base">
               <span>Total Paid</span>
               <span className="text-accent">
@@ -183,14 +273,7 @@ export default function OrderConfirmation() {
             <h2 className="font-display font-bold text-sm">Delivery Address</h2>
           </div>
           <div className="text-sm space-y-0.5">
-            <p className="font-semibold text-foreground">
-              {order.customerName}
-            </p>
-            <p className="text-muted-foreground">{order.customerPhone}</p>
-            <p className="text-muted-foreground">{order.address}</p>
-            <p className="text-muted-foreground">
-              {order.city} — {order.pincode}
-            </p>
+            <p className="text-muted-foreground">{order.shippingAddress}</p>
           </div>
         </motion.div>
 
@@ -199,7 +282,7 @@ export default function OrderConfirmation() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="bg-card rounded-2xl border border-border p-5 shadow-sm mb-8"
+          className="bg-card rounded-2xl border border-border p-5 shadow-sm mb-6"
           data-ocid="order-payment-summary"
         >
           <div className="flex items-center gap-2 mb-3">
@@ -215,12 +298,12 @@ export default function OrderConfirmation() {
           <div className="flex items-center justify-between mt-2">
             <span className="text-sm text-muted-foreground">Status</span>
             <Badge className="bg-primary/10 text-primary hover:bg-primary/10 text-xs border-0">
-              Confirmed
+              ✓ Confirmed
             </Badge>
           </div>
         </motion.div>
 
-        {/* CTA */}
+        {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -229,19 +312,21 @@ export default function OrderConfirmation() {
         >
           <Link to="/products">
             <Button
-              className="w-full h-12 text-base font-semibold btn-accent rounded-xl gap-2"
+              className="w-full h-12 text-base font-semibold btn-accent rounded-xl gap-2 group"
               data-ocid="order-continue-shopping-btn"
             >
               Continue Shopping
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
-          <Link to="/">
+          <Link to="/profile">
             <Button
-              variant="ghost"
-              className="w-full text-sm text-muted-foreground"
+              variant="outline"
+              className="w-full h-12 text-base font-semibold rounded-xl gap-2"
+              data-ocid="order-view-orders-btn"
             >
-              Back to Home
+              <ClipboardList className="w-4 h-4" />
+              View My Orders
             </Button>
           </Link>
         </motion.div>

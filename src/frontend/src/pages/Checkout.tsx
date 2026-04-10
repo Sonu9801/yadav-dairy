@@ -2,8 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useNavigate } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Banknote,
@@ -11,6 +10,7 @@ import {
   ChevronRight,
   CreditCard,
   Loader2,
+  Lock,
   MapPin,
   Phone,
   ShieldCheck,
@@ -20,8 +20,10 @@ import {
 import { motion } from "motion/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import type { PaymentMethod } from "../backend.d";
+import { toast } from "sonner";
+import { PaymentMethod } from "../backend.d";
 import ProductPackageSVG from "../components/products/ProductPackageSVG";
+import { useAuth } from "../contexts/AuthContext";
 import { usePlaceOrder } from "../hooks/use-backend";
 import { useCart } from "../hooks/use-cart";
 import { formatPrice } from "../lib/utils";
@@ -29,39 +31,50 @@ import { formatPrice } from "../lib/utils";
 interface AddressFormData {
   customerName: string;
   customerPhone: string;
-  address: string;
+  addressLine1: string;
+  addressLine2: string;
   city: string;
+  state: string;
   pincode: string;
 }
 
-type PaymentOption = PaymentMethod;
+interface CardDetails {
+  cardNumber: string;
+  expiry: string;
+  cvv: string;
+  cardHolder: string;
+}
+
+interface UpiDetails {
+  vpa: string;
+}
 
 const paymentOptions: {
-  id: PaymentOption;
+  id: PaymentMethod;
   label: string;
   desc: string;
   icon: React.ReactNode;
 }[] = [
   {
-    id: "cashOnDelivery" as PaymentOption,
+    id: PaymentMethod.cashOnDelivery,
     label: "Cash on Delivery",
     desc: "Pay when order arrives",
     icon: <Banknote className="w-5 h-5" />,
   },
   {
-    id: "upi" as PaymentOption,
+    id: PaymentMethod.upi,
     label: "UPI",
     desc: "GPay, PhonePe, Paytm",
     icon: <Smartphone className="w-5 h-5" />,
   },
   {
-    id: "card" as PaymentOption,
+    id: PaymentMethod.card,
     label: "Credit / Debit Card",
     desc: "Visa, Mastercard, RuPay",
     icon: <CreditCard className="w-5 h-5" />,
   },
   {
-    id: "netBanking" as PaymentOption,
+    id: PaymentMethod.netBanking,
     label: "Net Banking",
     desc: "All major banks",
     icon: <Building2 className="w-5 h-5" />,
@@ -71,10 +84,18 @@ const paymentOptions: {
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, cartTotal, clearCart } = useCart();
+  const { isAuthenticated, login } = useAuth();
   const { mutateAsync: placeOrder, isPending } = usePlaceOrder();
-  const [selectedPayment, setSelectedPayment] = useState<PaymentOption>(
-    "cashOnDelivery" as PaymentOption,
+  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(
+    PaymentMethod.cashOnDelivery,
   );
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
+    cardNumber: "",
+    expiry: "",
+    cvv: "",
+    cardHolder: "",
+  });
+  const [upiDetails, setUpiDetails] = useState<UpiDetails>({ vpa: "" });
 
   const deliveryFee =
     items.length > 0 && cartTotal < BigInt(500) ? BigInt(40) : BigInt(0);
@@ -86,35 +107,42 @@ export default function Checkout() {
     formState: { errors },
   } = useForm<AddressFormData>();
 
-  const onSubmit = async (data: AddressFormData) => {
-    try {
-      const orderItems = items.map((item) => ({
-        productId: item.productId,
-        productName: item.productName,
-        quantity: BigInt(item.quantity),
-        price: item.price,
-      }));
-
-      const order = await placeOrder({
-        customerName: data.customerName,
-        customerPhone: data.customerPhone,
-        address: data.address,
-        city: data.city,
-        pincode: data.pincode,
-        paymentMethod: selectedPayment,
-        items: orderItems,
-        totalAmount: grandTotal,
-      });
-
-      clearCart();
-      navigate({
-        to: "/order-confirmation/$id",
-        params: { id: order.id.toString() },
-      });
-    } catch (err) {
-      console.error("Failed to place order:", err);
-    }
-  };
+  // Protected route guard
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="max-w-sm"
+        >
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <Lock className="w-9 h-9 text-primary" strokeWidth={1.5} />
+          </div>
+          <h2 className="font-display text-xl font-bold text-foreground mb-2">
+            Login to Continue
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6">
+            Please log in to proceed to checkout and place your order securely.
+          </p>
+          <Button
+            onClick={login}
+            className="btn-accent h-12 px-8 text-base gap-2"
+            data-ocid="checkout-login-btn"
+          >
+            <User className="w-4 h-4" />
+            Login with Internet Identity
+          </Button>
+          <Link to="/cart" className="block mt-3">
+            <Button variant="ghost" className="text-sm text-muted-foreground">
+              ← Back to Cart
+            </Button>
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -127,8 +155,39 @@ export default function Checkout() {
     );
   }
 
+  const onSubmit = async (data: AddressFormData) => {
+    try {
+      const orderItems = items.map((item) => ({
+        productId: item.productId,
+        productName: item.name,
+        quantity: BigInt(item.quantity),
+        price: item.price,
+      }));
+
+      const shippingAddress = `${data.customerName}, ${data.customerPhone} | ${data.addressLine1}${data.addressLine2 ? `, ${data.addressLine2}` : ""}, ${data.city}, ${data.state} - ${data.pincode}`;
+
+      const order = await placeOrder({
+        paymentMethod: selectedPayment,
+        shippingAddress,
+        items: orderItems,
+        totalAmount: grandTotal,
+        deliveryFee: deliveryFee,
+      });
+
+      clearCart();
+      toast.success("Order placed successfully! 🎉");
+      navigate({
+        to: "/order-confirmation/$id",
+        params: { id: order.id.toString() },
+      });
+    } catch (err) {
+      console.error("Failed to place order:", err);
+      toast.error("Failed to place order. Please try again.");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" data-ocid="checkout-page">
       <div className="max-w-5xl mx-auto px-4 py-6">
         {/* Back */}
         <motion.div
@@ -227,15 +286,18 @@ export default function Checkout() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="address" className="text-sm font-medium">
-                      Full Address
+                    <Label
+                      htmlFor="addressLine1"
+                      className="text-sm font-medium"
+                    >
+                      Address Line 1
                     </Label>
                     <Input
-                      id="address"
+                      id="addressLine1"
                       placeholder="House No., Street, Locality"
                       className="h-11"
                       data-ocid="checkout-address-input"
-                      {...register("address", {
+                      {...register("addressLine1", {
                         required: "Address is required",
                         minLength: {
                           value: 10,
@@ -243,14 +305,33 @@ export default function Checkout() {
                         },
                       })}
                     />
-                    {errors.address && (
+                    {errors.addressLine1 && (
                       <p className="text-destructive text-xs">
-                        {errors.address.message}
+                        {errors.addressLine1.message}
                       </p>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="addressLine2"
+                      className="text-sm font-medium"
+                    >
+                      Address Line 2{" "}
+                      <span className="text-muted-foreground font-normal">
+                        (optional)
+                      </span>
+                    </Label>
+                    <Input
+                      id="addressLine2"
+                      placeholder="Apartment, Floor, Landmark"
+                      className="h-11"
+                      data-ocid="checkout-address2-input"
+                      {...register("addressLine2")}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="city" className="text-sm font-medium">
                         City
@@ -260,11 +341,32 @@ export default function Checkout() {
                         placeholder="Delhi"
                         className="h-11"
                         data-ocid="checkout-city-input"
-                        {...register("city", { required: "City is required" })}
+                        {...register("city", {
+                          required: "City is required",
+                        })}
                       />
                       {errors.city && (
                         <p className="text-destructive text-xs">
                           {errors.city.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="state" className="text-sm font-medium">
+                        State
+                      </Label>
+                      <Input
+                        id="state"
+                        placeholder="Delhi"
+                        className="h-11"
+                        data-ocid="checkout-state-input"
+                        {...register("state", {
+                          required: "State is required",
+                        })}
+                      />
+                      {errors.state && (
+                        <p className="text-destructive text-xs">
+                          {errors.state.message}
                         </p>
                       )}
                     </div>
@@ -349,6 +451,126 @@ export default function Checkout() {
                     </button>
                   ))}
                 </div>
+
+                {/* UPI additional fields */}
+                {selectedPayment === PaymentMethod.upi && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-4 space-y-2"
+                    data-ocid="payment-upi-fields"
+                  >
+                    <Label htmlFor="upi-vpa" className="text-sm font-medium">
+                      UPI ID / VPA
+                    </Label>
+                    <Input
+                      id="upi-vpa"
+                      placeholder="yourname@upi"
+                      className="h-11"
+                      value={upiDetails.vpa}
+                      onChange={(e) => setUpiDetails({ vpa: e.target.value })}
+                      data-ocid="checkout-upi-vpa-input"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      E.g. 9876543210@paytm or name@okicici
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Card additional fields */}
+                {selectedPayment === PaymentMethod.card && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-4 space-y-3"
+                    data-ocid="payment-card-fields"
+                  >
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">
+                        Cardholder Name
+                      </Label>
+                      <Input
+                        placeholder="Name on card"
+                        className="h-11"
+                        value={cardDetails.cardHolder}
+                        onChange={(e) =>
+                          setCardDetails((p) => ({
+                            ...p,
+                            cardHolder: e.target.value,
+                          }))
+                        }
+                        data-ocid="checkout-card-holder-input"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">Card Number</Label>
+                      <Input
+                        placeholder="1234 5678 9012 3456"
+                        maxLength={19}
+                        className="h-11 font-mono"
+                        value={cardDetails.cardNumber}
+                        onChange={(e) => {
+                          const v = e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 16)
+                            .replace(/(.{4})/g, "$1 ")
+                            .trim();
+                          setCardDetails((p) => ({ ...p, cardNumber: v }));
+                        }}
+                        data-ocid="checkout-card-number-input"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-medium">
+                          Expiry (MM/YY)
+                        </Label>
+                        <Input
+                          placeholder="08/27"
+                          maxLength={5}
+                          className="h-11"
+                          value={cardDetails.expiry}
+                          onChange={(e) => {
+                            const v = e.target.value
+                              .replace(/\D/g, "")
+                              .slice(0, 4)
+                              .replace(/^(\d{2})(\d)/, "$1/$2");
+                            setCardDetails((p) => ({ ...p, expiry: v }));
+                          }}
+                          data-ocid="checkout-card-expiry-input"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-medium">CVV</Label>
+                        <Input
+                          placeholder="•••"
+                          type="password"
+                          maxLength={4}
+                          className="h-11"
+                          value={cardDetails.cvv}
+                          onChange={(e) =>
+                            setCardDetails((p) => ({
+                              ...p,
+                              cvv: e.target.value
+                                .replace(/\D/g, "")
+                                .slice(0, 4),
+                            }))
+                          }
+                          data-ocid="checkout-card-cvv-input"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
+                      <Lock className="w-3.5 h-3.5" />
+                      Mock payment — no real charges will be made
+                    </div>
+                  </motion.div>
+                )}
+
                 <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   All payments are secure and encrypted
@@ -379,14 +601,14 @@ export default function Checkout() {
                       <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden flex-shrink-0 flex items-center justify-center">
                         <ProductPackageSVG
                           packagingKey={item.imageUrl}
-                          productName={item.productName}
+                          productName={item.name}
                           size="sm"
                           className="w-9 h-9"
                         />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium truncate">
-                          {item.productName}
+                          {item.name}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           ×{item.quantity}
@@ -445,6 +667,10 @@ export default function Checkout() {
                     </>
                   )}
                 </Button>
+
+                <p className="text-center text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
+                  <Lock className="w-3 h-3" /> Secure &amp; encrypted checkout
+                </p>
               </div>
             </motion.div>
           </div>

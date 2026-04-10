@@ -4,14 +4,12 @@ import type {
   OrderItem as BackendOrderItem,
   Product as BackendProduct,
   Subcategory as BackendSubcategory,
-  OrderStatus,
-  PaymentMethod,
 } from "../backend.d";
+import { OrderStatus, PaymentMethod } from "../backend.d";
 
-export type { OrderStatus, PaymentMethod };
+export { OrderStatus, PaymentMethod };
 
-// Augmented Product type with brand field (added to backend; use optional until bindgen runs)
-export type Product = BackendProduct & { brand?: string };
+export type Product = BackendProduct;
 export type Category = BackendCategory;
 export type Subcategory = BackendSubcategory;
 export type Order = BackendOrder;
@@ -20,12 +18,13 @@ export type OrderItem = BackendOrderItem;
 // Frontend-only cart types
 export interface CartItem {
   productId: bigint;
-  productName: string;
-  productNameHi: string;
+  name: string;
+  nameHindi: string;
   price: bigint;
   imageUrl: string;
   quantity: number;
   packagingType: string;
+  stock: bigint;
 }
 
 export interface CartState {
@@ -43,3 +42,29 @@ export type CategoryId = bigint;
 export type SubcategoryId = bigint;
 export type OrderId = bigint;
 export type Timestamp = bigint;
+
+// User profile type (local cache)
+export interface LocalUserProfile {
+  displayName: string;
+  email: string;
+  phone: string;
+  address: string;
+}
+
+// Review type (local)
+export interface LocalReview {
+  id: string;
+  productId: string;
+  reviewerPrincipal: string;
+  reviewerName: string;
+  rating: number;
+  comment: string;
+  createdAt: number;
+}
+
+// Contact message type (local form)
+export interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}

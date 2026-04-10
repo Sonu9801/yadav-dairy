@@ -9,9 +9,9 @@ module {
   public type Category = {
     id : CategoryId;
     name : Text;
-    nameHi : Text;
-    description : Text;
-    iconEmoji : Text;
+    nameHindi : Text;
+    icon : Text;
+    colorClass : Text;
     sortOrder : Nat;
   };
 
@@ -19,88 +19,94 @@ module {
     id : SubcategoryId;
     categoryId : CategoryId;
     name : Text;
-    nameHi : Text;
+    nameHindi : Text;
   };
 
   public type Product = {
     id : ProductId;
-    nameEn : Text;
-    nameHi : Text;
+    name : Text;
+    nameHindi : Text;
     brand : Text;
     description : Text;
     price : Nat;
     originalPrice : Nat;
-    categoryId : CategoryId;
-    subcategoryId : SubcategoryId;
+    category : Text;
+    subcategory : Text;
     packagingType : Text;
-    fatContent : Text;
     imageUrl : Text;
+    quantity : Text;
     inStock : Bool;
-    stockCount : Nat;
+    stock : Nat;
     rating : Float;
     reviewCount : Nat;
     isFeatured : Bool;
     isTrending : Bool;
+    isBestSeller : Bool;
+    isFreshArrival : Bool;
     createdAt : Timestamp;
   };
 
   public type CreateProductArgs = {
-    nameEn : Text;
-    nameHi : Text;
+    name : Text;
+    nameHindi : Text;
     brand : Text;
     description : Text;
     price : Nat;
     originalPrice : Nat;
-    categoryId : CategoryId;
-    subcategoryId : SubcategoryId;
+    category : Text;
+    subcategory : Text;
     packagingType : Text;
-    fatContent : Text;
     imageUrl : Text;
+    quantity : Text;
     inStock : Bool;
-    stockCount : Nat;
+    stock : Nat;
     isFeatured : Bool;
     isTrending : Bool;
+    isBestSeller : Bool;
+    isFreshArrival : Bool;
   };
 
   public type UpdateProductArgs = {
     id : ProductId;
-    nameEn : Text;
-    nameHi : Text;
+    name : Text;
+    nameHindi : Text;
     brand : Text;
     description : Text;
     price : Nat;
     originalPrice : Nat;
-    categoryId : CategoryId;
-    subcategoryId : SubcategoryId;
+    category : Text;
+    subcategory : Text;
     packagingType : Text;
-    fatContent : Text;
     imageUrl : Text;
+    quantity : Text;
     inStock : Bool;
-    stockCount : Nat;
+    stock : Nat;
     isFeatured : Bool;
     isTrending : Bool;
+    isBestSeller : Bool;
+    isFreshArrival : Bool;
   };
 
   public type CreateCategoryArgs = {
     name : Text;
-    nameHi : Text;
-    description : Text;
-    iconEmoji : Text;
+    nameHindi : Text;
+    icon : Text;
+    colorClass : Text;
     sortOrder : Nat;
   };
 
   public type UpdateCategoryArgs = {
     id : CategoryId;
     name : Text;
-    nameHi : Text;
-    description : Text;
-    iconEmoji : Text;
+    nameHindi : Text;
+    icon : Text;
+    colorClass : Text;
     sortOrder : Nat;
   };
 
   public type CreateSubcategoryArgs = {
     categoryId : CategoryId;
     name : Text;
-    nameHi : Text;
+    nameHindi : Text;
   };
 };

@@ -3,5 +3,6 @@ module {
   public type CategoryId = Nat;
   public type SubcategoryId = Nat;
   public type OrderId = Nat;
+  public type UserId = Principal;
   public type Timestamp = Int;
 };

@@ -165,13 +165,7 @@ export default function AdminOrders() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
                       <p className="font-medium text-foreground text-sm">
-                        {order.customerName}
-                      </p>
-                      <p className="text-xs text-muted-foreground hidden sm:block">
-                        {order.customerPhone}
-                      </p>
-                      <p className="text-xs text-muted-foreground hidden md:block">
-                        {order.city}
+                        Order #{orderId.slice(-6)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -241,14 +235,10 @@ export default function AdminOrders() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
                       <div>
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                          Customer Details
+                          Shipping Address
                         </p>
-                        <p className="text-foreground">{order.customerName}</p>
-                        <p className="text-muted-foreground">
-                          {order.customerPhone}
-                        </p>
-                        <p className="text-muted-foreground mt-1 text-xs">
-                          {order.address}, {order.city} — {order.pincode}
+                        <p className="text-muted-foreground text-xs">
+                          {order.shippingAddress}
                         </p>
                       </div>
                       <div>

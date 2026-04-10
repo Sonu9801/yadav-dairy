@@ -3,15 +3,18 @@ import Runtime "mo:core/Runtime";
 module {
   public func setAdmin(currentAdmin : ?Principal, caller : Principal) : Principal {
     switch (currentAdmin) {
-      case (?_) { Runtime.trap("Admin already set") };
-      case null { caller };
+      case null caller;
+      case (?admin) {
+        if (admin == caller) caller
+        else Runtime.trap("Unauthorized: only the current admin can transfer admin rights");
+      };
     };
   };
 
   public func isAdmin(adminPrincipal : ?Principal, caller : Principal) : Bool {
     switch (adminPrincipal) {
-      case (?admin) { admin == caller };
-      case null { false };
+      case null true; // no admin set yet — allow first caller
+      case (?admin) admin == caller;
     };
   };
 

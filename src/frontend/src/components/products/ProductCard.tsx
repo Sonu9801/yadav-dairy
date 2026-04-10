@@ -3,10 +3,11 @@ import StarRating from "@/components/ui/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { useWishlist } from "@/hooks/use-wishlist";
 import { calculateDiscount, formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
-import { Link } from "@tanstack/react-router";
-import { Plus, ShoppingCart } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Heart, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProductCardProps {
@@ -18,11 +19,15 @@ export default function ProductCard({
   product,
   variant = "grid",
 }: ProductCardProps) {
+  const navigate = useNavigate();
   const addItem = useCart((s) => s.addItem);
   const items = useCart((s) => s.items);
   const updateQuantity = useCart((s) => s.updateQuantity);
   const removeItem = useCart((s) => s.removeItem);
+  const { isWishlisted, addToWishlist, removeFromWishlist } = useWishlist();
 
+  const productIdStr = product.id.toString();
+  const wishlisted = isWishlisted(productIdStr);
   const discount = calculateDiscount(product.price, product.originalPrice);
   const cartItem = items.find((i) => i.productId === product.id);
   const qty = cartItem?.quantity ?? 0;
@@ -31,7 +36,12 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     addItem(product);
-    toast.success(`${product.nameEn} added to cart`);
+    toast.success(`${product.name} added to cart`, {
+      action: {
+        label: "Go to Cart",
+        onClick: () => void navigate({ to: "/cart" }),
+      },
+    });
   }
 
   function handleIncrement(e: React.MouseEvent) {
@@ -50,6 +60,18 @@ export default function ProductCard({
     }
   }
 
+  function handleWishlist(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (wishlisted) {
+      removeFromWishlist(productIdStr);
+      toast.info(`${product.name} removed from wishlist`);
+    } else {
+      addToWishlist(productIdStr);
+      toast.success(`${product.name} added to wishlist ❤️`);
+    }
+  }
+
   if (variant === "list") {
     return (
       <Link
@@ -61,15 +83,17 @@ export default function ProductCard({
         <div className="w-20 h-20 rounded-lg flex-shrink-0 bg-muted/30 overflow-hidden flex items-center justify-center">
           <ProductPackageSVG
             packagingKey={product.imageUrl}
-            productName={product.nameEn}
+            productName={product.name}
             size="sm"
           />
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-sm text-foreground truncate">
-            {product.nameEn}
+            {product.name}
           </div>
-          <div className="text-muted-foreground text-xs">{product.nameHi}</div>
+          <div className="text-muted-foreground text-xs">
+            {product.nameHindi}
+          </div>
           <div className="flex items-center gap-1 mt-1">
             <StarRating rating={product.rating} size="sm" />
             <span className="text-muted-foreground text-xs">
@@ -128,13 +152,7 @@ export default function ProductCard({
             disabled={!product.inStock}
             data-ocid="add-to-cart-btn"
           >
-            {product.inStock ? (
-              <>
-                <ShoppingCart className="w-3 h-3 mr-1" /> Add
-              </>
-            ) : (
-              "Out of stock"
-            )}
+            {product.inStock ? "ADD +" : "Out of stock"}
           </Button>
         )}
       </Link>
@@ -148,13 +166,26 @@ export default function ProductCard({
       className="flex flex-col bg-card rounded-xl overflow-hidden shadow-card card-hover border border-border"
       data-ocid="product-grid-card"
     >
-      <div className="relative bg-muted/20 flex items-center justify-center aspect-square">
+      <div className="relative bg-muted/20 flex items-center justify-center p-3 aspect-square">
         <ProductPackageSVG
           packagingKey={product.imageUrl}
-          productName={product.nameEn}
+          productName={product.name}
           size="md"
-          className="w-full h-full"
         />
+
+        {/* Wishlist heart */}
+        <button
+          type="button"
+          onClick={handleWishlist}
+          className="absolute top-2 right-2 p-1.5 rounded-full bg-card/80 backdrop-blur-sm shadow-subtle hover:scale-110 transition-smooth"
+          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          data-ocid="wishlist-toggle"
+        >
+          <Heart
+            className={`w-4 h-4 transition-colors ${wishlisted ? "fill-red-500 text-red-500" : "text-muted-foreground"}`}
+          />
+        </button>
+
         {discount > 0 && (
           <div className="absolute top-2 left-2 bg-accent text-accent-foreground text-xs font-bold px-2 py-0.5 rounded-full">
             {discount}% OFF
@@ -167,20 +198,25 @@ export default function ProductCard({
             </span>
           </div>
         )}
+        {Number(product.stock) > 0 &&
+          Number(product.stock) <= 5 &&
+          product.inStock && (
+            <div className="absolute bottom-2 left-2 bg-destructive/90 text-destructive-foreground text-xs font-semibold px-2 py-0.5 rounded-full">
+              Only {Number(product.stock)} left!
+            </div>
+          )}
       </div>
 
       <div className="p-3 flex flex-col flex-1">
         <div className="font-semibold text-sm text-foreground leading-snug line-clamp-1">
-          {product.nameEn}
+          {product.name}
         </div>
         <div className="text-muted-foreground text-xs mt-0.5">
-          {product.nameHi}
+          {product.nameHindi}
         </div>
-        <p className="text-xs text-primary font-semibold mt-0.5">
-          {product.brand ?? "Yadav Dairy"}
-        </p>
+        <p className="text-xs text-primary font-semibold mt-0.5">Yadav Dairy</p>
         <div className="text-muted-foreground text-xs mt-0.5">
-          {product.packagingType}
+          {product.quantity}
         </div>
 
         <div className="flex items-center gap-1 mt-1">
@@ -203,15 +239,15 @@ export default function ProductCard({
 
         <div className="mt-auto pt-2">
           {qty > 0 ? (
-            <fieldset className="flex items-center justify-between bg-primary/10 rounded-lg px-2 py-1 border-0 p-0 m-0">
+            <div
+              className="flex items-center justify-between bg-primary/10 rounded-lg px-2 py-1"
+              onClick={(e) => e.preventDefault()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 className="text-primary font-bold text-lg w-7 h-7 flex items-center justify-center hover:bg-primary/20 rounded-full transition-colors"
                 onClick={handleDecrement}
-                onKeyUp={(e) =>
-                  e.key === "Enter" &&
-                  handleDecrement(e as unknown as React.MouseEvent)
-                }
                 aria-label="Decrease quantity"
                 data-ocid="qty-decrement"
               >
@@ -222,28 +258,21 @@ export default function ProductCard({
                 type="button"
                 className="text-primary font-bold text-lg w-7 h-7 flex items-center justify-center hover:bg-primary/20 rounded-full transition-colors"
                 onClick={handleIncrement}
-                onKeyUp={(e) =>
-                  e.key === "Enter" &&
-                  handleIncrement(e as unknown as React.MouseEvent)
-                }
                 aria-label="Increase quantity"
                 data-ocid="qty-increment"
               >
                 +
               </button>
-            </fieldset>
+            </div>
           ) : (
             <button
               type="button"
-              className="w-full btn-accent text-xs h-8 rounded-lg flex items-center justify-center gap-1 font-semibold disabled:opacity-50"
+              className="w-full bg-primary text-primary-foreground text-xs h-9 rounded-lg flex items-center justify-center gap-1 font-bold disabled:opacity-50 hover:opacity-90 transition-smooth shadow-subtle"
               onClick={handleAdd}
-              onKeyUp={(e) =>
-                e.key === "Enter" && handleAdd(e as unknown as React.MouseEvent)
-              }
               disabled={!product.inStock}
               data-ocid="add-to-cart-btn"
             >
-              ADD TO CART <Plus className="w-3 h-3" />
+              ADD + <Plus className="w-3 h-3" />
             </button>
           )}
         </div>
